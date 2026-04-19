@@ -2,24 +2,21 @@
 
 namespace Garaekz\Cachelet\Console\Commands;
 
+use Garaekz\Cachelet\Support\CoordinateLogger;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Cache;
 
 class CacheletListCommand extends Command
 {
-    protected $signature = 'cachelet:list {--prefix=}';
+    protected $signature = 'cachelet:list {prefix}';
 
-    protected $description = 'List cachelet keys by prefix';
+    protected $description = 'List cachelet keys for a prefix';
 
-    public function handle(): int
+    public function handle(CoordinateLogger $logger): int
     {
-        $prefix = $this->option('prefix') ?? 'generic';
-        $set = Cache::getStore()->smembers("cachelet:registry:$prefix");
-
-        foreach ($set as $key) {
-            $this->line("- $key");
+        foreach ($logger->keys((string) $this->argument('prefix')) as $key) {
+            $this->line($key);
         }
 
-        return 0;
+        return self::SUCCESS;
     }
 }

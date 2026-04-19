@@ -2,6 +2,7 @@
 
 namespace Garaekz\Cachelet\Support;
 
+use DateTimeInterface;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Database\Eloquent\Model;
 use JsonSerializable;
@@ -19,6 +20,7 @@ class PayloadNormalizer
             $value instanceof Model => $this->normalizeModel($value),
             $value instanceof Arrayable => $this->normalize($value->toArray()),
             $value instanceof JsonSerializable => $this->normalize($value->jsonSerialize()),
+            $value instanceof DateTimeInterface => $value->format(DateTimeInterface::ATOM),
             is_object($value) => $this->normalizeObject($value),
             default => $value,
         };
@@ -42,6 +44,11 @@ class PayloadNormalizer
         }
 
         return $this->normalizeArray($attributes);
+    }
+
+    protected function normalizeObject(object $value): array
+    {
+        return $this->normalizeArray(get_object_vars($value));
     }
 
     protected function applyFieldFilters(array $array): array

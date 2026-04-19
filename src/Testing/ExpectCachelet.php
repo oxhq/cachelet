@@ -13,25 +13,18 @@ class ExpectCachelet
     public function toBeStored(): static
     {
         if (! Cache::has($this->key)) {
-            throw new \Exception("Cachelet not stored: {$this->key}");
+            throw new \RuntimeException("Cachelet not stored: {$this->key}");
         }
 
         return $this;
     }
 
-    public function toExpireAfter(int $seconds): static
+    public function toHaveValue(mixed $expected): static
     {
-        $ttl = Cache::getRedis()->ttl($this->key);
-        if (abs($ttl - $seconds) > 5) {
-            throw new \Exception("Expected TTL ~$seconds, got $ttl");
+        if (Cache::get($this->key) !== $expected) {
+            throw new \RuntimeException("Cachelet value mismatch for {$this->key}");
         }
 
-        return $this;
-    }
-
-    public function toHaveTags(array $tags): static
-    {
-        // For advanced drivers only
         return $this;
     }
 }

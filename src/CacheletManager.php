@@ -4,7 +4,6 @@ namespace Garaekz\Cachelet;
 
 use Garaekz\Cachelet\Builders\CacheletBuilder;
 use Garaekz\Cachelet\Builders\ModelCacheletBuilder;
-use Garaekz\Cachelet\Contracts\CacheletBuilderInterface;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Traits\Macroable;
 
@@ -12,59 +11,28 @@ class CacheletManager
 {
     use Macroable;
 
-    protected array $config;
+    public function __construct(
+        protected array $config = []
+    ) {}
 
-    protected array $builders = [];
-
-    public function __construct(array $config = [])
+    public function for(string $prefix): CacheletBuilder
     {
-        $this->config = $config;
+        return new CacheletBuilder($prefix, $this->config);
     }
 
-    public function for(string $prefix): CacheletBuilderInterface
+    public function forModel(Model $model, ?string $prefix = null): ModelCacheletBuilder
     {
-        return $this->createBuilder(CacheletBuilder::class, $prefix);
+        $builder = new ModelCacheletBuilder($prefix ?? $this->prefixForModel($model), $this->config);
+
+        return $builder->setModel($model);
     }
 
-    public function forModel(Model $model, ?string $prefix = null): CacheletBuilderInterface
+    public function prefixForModel(Model $model): string
     {
-        $prefix = $prefix ?? $this->getModelPrefix($model);
-
-        $builder = $this->createModelBuilder($prefix);
-
-        return $builder->setModel($model)
-            ->from($this->getModelCacheableAttributes($model));
-    }
-
-    protected function createModelBuilder(string $prefix): ModelCacheletBuilder
-    {
-        return new ModelCacheletBuilder($prefix, $this->config);
-    }
-
-    public function forPrefixModel(string $prefix, Model $model): CacheletBuilderInterface
-    {
-        return $this->forModel($model, $prefix);
-    }
-
-    protected function createBuilder(string $builderClass, string $prefix): CacheletBuilderInterface
-    {
-        return new $builderClass($prefix, $this->config);
-    }
-
-    protected function getModelPrefix(Model $model): string
-    {
-        $table = $model->getTable();
-        $key = $model->getKey();
-
-        return "{$table}:{$key}";
-    }
-
-    protected function getModelCacheableAttributes(Model $model): array
-    {
-        if (method_exists($model, 'getCacheableAttributes')) {
-            return $model->getCacheableAttributes();
+        if (method_exists($model, 'getCacheletPrefix')) {
+            return (string) $model->getCacheletPrefix();
         }
 
-        return $model->getAttributes();
+        return $model->getTable().':'.$model->getKey();
     }
 }

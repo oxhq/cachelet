@@ -28,7 +28,6 @@ class CacheletBuilder implements CacheletBuilderInterface
     protected ?string $version = null;
 
     protected array $options = [
-        'normalize' => true,
         'excludeTimestamps' => true,
     ];
 
@@ -56,28 +55,32 @@ class CacheletBuilder implements CacheletBuilderInterface
     public function withTags(string|array $tags): static
     {
         $tags = is_string($tags) ? [$tags] : $tags;
-        $this->tags = array_unique(array_merge($this->tags, $tags));
+        $this->tags = array_values(array_unique(array_merge($this->tags, $tags)));
 
         return $this;
     }
 
     public function versioned(?string $version = null): static
     {
-        $this->version = $version ?? $this->config['version'] ?? 'v1';
+        $this->version = $version ?? 'v1';
+        $this->resetComputedValues();
 
         return $this;
     }
 
     public function only(array $fields): static
     {
-        $this->options['only'] = $fields;
+        $this->options['only'] = array_values($fields);
+        unset($this->options['exclude']);
+        $this->resetComputedValues();
 
         return $this;
     }
 
     public function exclude(array $fields): static
     {
-        $this->options['exclude'] = $fields;
+        $this->options['exclude'] = array_values($fields);
+        $this->resetComputedValues();
 
         return $this;
     }
@@ -89,18 +92,35 @@ class CacheletBuilder implements CacheletBuilderInterface
 
     public function rememberForever(Closure $callback): mixed
     {
-        $this->ttl = null;
+        $this->markStoreForever();
 
         return $this->fetch($callback);
+    }
+
+    public function invalidate(): void
+    {
+        $coordinate = $this->coordinate();
+
+        $this->coordinateLogger()->forget($coordinate);
+        $this->dispatchInvalidatedEvent([$coordinate->key]);
+    }
+
+    public function invalidatePrefix(string $reason = 'manual'): array
+    {
+        $keys = $this->coordinateLogger()->flush($this->prefix);
+        $this->dispatchInvalidatedEvent($keys, $reason);
+
+        return $keys;
     }
 
     public function coordinate(): CacheCoordinate
     {
         return new CacheCoordinate(
+            prefix: $this->prefix,
             key: $this->key(),
             ttl: $this->duration(),
             tags: $this->tags,
-            metadata: $this->metadata
+            metadata: $this->metadata,
         );
     }
 }

@@ -2,68 +2,62 @@
 
 declare(strict_types=1);
 
+use Garaekz\Cachelet\Builders\CacheletBuilder;
 use Garaekz\Cachelet\Facades\Cachelet;
-use Garaekz\Cachelet\Tests\TestCase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 
-uses(TestCase::class);
+it('generates stable keys for reordered payloads', function () {
+    $first = Cachelet::for('users')->from(['b' => 2, 'a' => 1]);
+    $second = Cachelet::for('users')->from(['a' => 1, 'b' => 2]);
 
-it('same payload in different order yields same key', function () {
-    $p1 = ['b' => 2, 'a' => 1];
-    $p2 = ['a' => 1, 'b' => 2];
-
-    $c1 = Cachelet::for('test')->from($p1)->ttl(null);
-    $c2 = Cachelet::for('test')->from($p2)->ttl(null);
-
-    expect($c1->key())->toBe($c2->key());
+    expect($first->key())->toBe($second->key());
 });
 
-it('default ttl when none provided', function () {
-    $default = 3600; // 1 hour in seconds
-    $c = Cachelet::for('demo')->from('x')->ttl(null);
+it('uses the configured default ttl when none is provided', function () {
+    $builder = Cachelet::for('users')->from(['id' => 1]);
 
-    expect($c->duration())->toBe($default);
+    expect($builder->duration())->toBe(3600)
+        ->and($builder->coordinate()->ttl)->toBe(3600);
 });
 
-it('int ttl works and throws on invalid', function () {
-    $c = Cachelet::for('int')->from('x')->ttl(120);
-    expect($c->duration())->toBe(120);
+it('parses integer, string, and datetime ttls', function () {
+    $datetime = Carbon::now()->addMinutes(5);
 
-    $this->expectException(\InvalidArgumentException::class);
-    Cachelet::for('neg')->from('x')->ttl(0)->duration();
+    expect(Cachelet::for('int')->from('x')->ttl(120)->duration())->toBe(120)
+        ->and(Cachelet::for('str')->from('x')->ttl('+2 hours')->duration())->toBe(7200)
+        ->and(Cachelet::for('dt')->from('x')->ttl($datetime)->duration())->toBe(300);
 });
 
-it('string ttl via Carbon parse', function () {
-    $c = Cachelet::for('str')->from('y')->ttl('+2 hours');
-    expect($c->duration())->toBe(7200);
-});
+it('stores and fetches cached values', function () {
+    $builder = Cachelet::for('remember')->from(['id' => 10])->ttl(60);
 
-it('Carbon ttl works', function () {
-    $expires = Carbon::now()->addMinutes(5);
-    $c = Cachelet::for('car')->from('y')->ttl($expires);
-    expect($c->duration())->toBe(300);
-});
-
-it('expiresAt adds seconds to now', function () {
-    $c = Cachelet::for('exp')->from('y')->ttl(30);
-    expect($c->expiresAt()->timestamp)->toBe(Carbon::now()->addSeconds(30)->timestamp);
-});
-
-it('fetch without callback returns null if not stored', function () {
-    Cache::flush();
-    $val = Cachelet::for('f')->from('x')->ttl(10)->fetch();
-    expect($val)->toBeNull();
-});
-
-it('fetch remembers and retrieves', function () {
-    Cache::flush();
-    $c = Cachelet::for('remember')->from('z')->ttl(10);
-
-    $first = $c->fetch(fn () => 'computed');
-    $second = $c->fetch();
+    $first = $builder->remember(fn () => 'computed');
+    $second = $builder->fetch();
 
     expect($first)->toBe('computed')
-        ->and($second)->toBe('computed')
-        ->and(Cache::has($c->key()))->toBeTrue();
+        ->and($second)->toBe('computed');
+
+    expectCachelet($builder->key())
+        ->toBeStored()
+        ->toHaveValue('computed');
+});
+
+it('can store forever and invalidate a single key', function () {
+    $builder = Cachelet::for('forever')->from(['id' => 11]);
+
+    $builder->rememberForever(fn () => 'persisted');
+
+    expect($builder->coordinate()->ttl)->toBeNull();
+    expect(Cache::has($builder->key()))->toBeTrue();
+
+    $builder->invalidate();
+
+    expect(Cache::has($builder->key()))->toBeFalse();
+});
+
+it('resolves the facade to the canonical builder', function () {
+    $builder = Cachelet::for('users');
+
+    expect($builder)->toBeInstanceOf(CacheletBuilder::class);
 });

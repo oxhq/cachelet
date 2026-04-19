@@ -3,38 +3,50 @@
 namespace Garaekz\Cachelet\Concerns;
 
 use Closure;
+use Garaekz\Cachelet\Events\CacheletHit;
+use Garaekz\Cachelet\Events\CacheletInvalidated;
+use Garaekz\Cachelet\Events\CacheletMiss;
+use Garaekz\Cachelet\Events\CacheletStored;
+use Garaekz\Cachelet\Support\CoordinateLogger;
+use Illuminate\Cache\Repository;
+use Illuminate\Cache\TaggableStore;
+use Illuminate\Cache\TaggedCache;
 use Illuminate\Support\Facades\Cache;
+use InvalidArgumentException;
 
 trait BuildsCache
 {
     public function fetch(?Closure $callback = null): mixed
     {
-        $key = $this->key();
-        $value = Cache::get($key);
+        $value = $this->getStoredValue();
 
-        if ($value !== null || $callback === null) {
-            $this->dispatchEvent('hit', $key, $value);
+        if ($value !== null) {
+            $this->dispatchCacheEvent('hit', $this->key(), $value);
 
             return $value;
         }
 
-        $this->dispatchEvent('miss', $key);
+        $this->dispatchCacheEvent('miss', $this->key());
 
-        $value = Cache::remember($key, $this->duration(), $callback);
-        $this->dispatchEvent('stored', $key, $value);
+        if ($callback === null) {
+            return null;
+        }
 
-        return $value;
+        return $this->computeAndStore($callback);
     }
 
     public function staleWhileRevalidate(Closure $callback, ?Closure $fallback = null): mixed
     {
-        $cached = Cache::get($this->key());
+        $cached = $this->getStoredValue();
 
         if ($cached !== null) {
+            $this->dispatchCacheEvent('hit', $this->key(), $cached);
             $this->backgroundRefresh($callback);
 
             return $cached;
         }
+
+        $this->dispatchCacheEvent('miss', $this->key());
 
         if ($fallback !== null) {
             $this->backgroundRefresh($callback);
@@ -47,40 +59,110 @@ trait BuildsCache
 
     protected function backgroundRefresh(Closure $callback): void
     {
-        if (! Cache::add($this->key().':refresh', true, 30)) {
+        $lockKey = $this->key().($this->config['stale']['lock_suffix'] ?? ':refresh');
+        $lockTtl = (int) ($this->config['stale']['lock_ttl'] ?? 30);
+
+        if (! Cache::add($lockKey, true, $lockTtl)) {
             return;
         }
 
-        $task = fn () => $this->computeAndStore($callback);
+        $refresh = function () use ($callback, $lockKey): void {
+            try {
+                $this->computeAndStore($callback);
+            } finally {
+                Cache::forget($lockKey);
+            }
+        };
 
-        match ($this->config['stale']['driver'] ?? 'queue') {
-            'defer' => app()->terminating($task),
-            'sync' => $task(),
-            default => dispatch($task)->afterResponse()
+        match ($this->config['stale']['refresh'] ?? 'queue') {
+            'sync' => $refresh(),
+            'defer' => app()->terminating($refresh),
+            default => dispatch($refresh)->afterResponse(),
         };
     }
 
     protected function computeAndStore(Closure $callback): mixed
     {
         $value = value($callback);
-        Cache::put($this->key(), $value, $this->duration());
-        $this->dispatchEvent('stored', $this->key(), $value);
+
+        $this->putStoredValue($value);
+        $this->coordinateLogger()->record($this->coordinate());
+        $this->dispatchCacheEvent('stored', $this->key(), $value);
 
         return $value;
     }
 
-    protected function dispatchEvent(string $type, string $key, mixed $value = null): void
+    protected function getStoredValue(): mixed
+    {
+        return $this->resolveStore()->get($this->key());
+    }
+
+    protected function putStoredValue(mixed $value): void
+    {
+        $store = $this->resolveStore();
+        $ttl = $this->duration();
+
+        if ($ttl === null) {
+            $store->forever($this->key(), $value);
+
+            return;
+        }
+
+        $store->put($this->key(), $value, $ttl);
+    }
+
+    protected function resolveStore(): Repository|TaggedCache
+    {
+        $store = Cache::store();
+
+        if ($this->tags === [] || ! $this->supportsTags($store)) {
+            return $store;
+        }
+
+        return $store->tags($this->tags);
+    }
+
+    protected function supportsTags(Repository $store): bool
+    {
+        return $store->getStore() instanceof TaggableStore;
+    }
+
+    protected function dispatchCacheEvent(string $type, string $key, mixed $value = null): void
     {
         if (! ($this->config['observability']['events']['enabled'] ?? false)) {
             return;
         }
 
-        $eventClass = match ($type) {
-            'hit' => \Garaekz\Cachelet\Events\CacheletHit::class,
-            'miss' => \Garaekz\Cachelet\Events\CacheletMiss::class,
-            'stored' => \Garaekz\Cachelet\Events\CacheletStored::class,
+        $event = match ($type) {
+            'hit' => new CacheletHit($key, $value),
+            'miss' => new CacheletMiss($key),
+            'stored' => new CacheletStored($key, $value),
+            default => throw new InvalidArgumentException("Unknown cache event type [{$type}]."),
         };
 
-        event(new $eventClass($key, $value));
+        event($event);
+    }
+
+    protected function dispatchInvalidatedEvent(array $keys, string $reason = 'manual'): void
+    {
+        if (! ($this->config['observability']['events']['enabled'] ?? false)) {
+            return;
+        }
+
+        event($this->makeInvalidatedEvent($keys, $reason));
+    }
+
+    protected function makeInvalidatedEvent(array $keys, string $reason): CacheletInvalidated
+    {
+        return new CacheletInvalidated(
+            prefix: $this->prefix,
+            keys: array_values($keys),
+            reason: $reason
+        );
+    }
+
+    protected function coordinateLogger(): CoordinateLogger
+    {
+        return app(CoordinateLogger::class);
     }
 }

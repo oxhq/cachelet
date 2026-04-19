@@ -2,27 +2,21 @@
 
 namespace Garaekz\Cachelet\Console\Commands;
 
+use Garaekz\Cachelet\Support\CoordinateLogger;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Cache;
 
 class CacheletFlushCommand extends Command
 {
-    protected $signature = 'cachelet:flush {--prefix=}';
+    protected $signature = 'cachelet:flush {prefix}';
 
-    protected $description = 'Flush cachelet keys by prefix';
+    protected $description = 'Flush cachelet keys for a prefix';
 
-    public function handle(): int
+    public function handle(CoordinateLogger $logger): int
     {
-        $prefix = $this->option('prefix') ?? 'generic';
-        $set = Cache::getStore()->smembers("cachelet:registry:$prefix");
-
-        foreach ($set as $key) {
-            Cache::forget($key);
-            $this->line("Deleted: $key");
+        foreach ($logger->flush((string) $this->argument('prefix')) as $key) {
+            $this->line("Deleted: {$key}");
         }
 
-        Cache::getStore()->del("cachelet:registry:$prefix");
-
-        return 0;
+        return self::SUCCESS;
     }
 }

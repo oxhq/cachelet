@@ -2,17 +2,20 @@
 
 namespace Garaekz\Cachelet\Traits;
 
+use Garaekz\Cachelet\Builders\ModelCacheletBuilder;
+use Garaekz\Cachelet\Facades\Cachelet;
 use Garaekz\Cachelet\Observers\CacheletModelObserver;
-use Garaekz\Cachelet\Support\Cachelet;
 
 trait UsesCachelet
 {
     public static function bootUsesCachelet(): void
     {
-        static::observe(CacheletModelObserver::class);
+        if (config('cachelet.observe.auto_register', true)) {
+            static::observe(CacheletModelObserver::class);
+        }
     }
 
-    public function cachelet(): \Garaekz\Cachelet\Core\CacheletBuilder
+    public function cachelet(): ModelCacheletBuilder
     {
         return Cachelet::forModel($this);
     }

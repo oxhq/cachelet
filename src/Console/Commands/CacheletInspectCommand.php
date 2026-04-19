@@ -2,24 +2,21 @@
 
 namespace Garaekz\Cachelet\Console\Commands;
 
-use Garaekz\Cachelet\Core\CoordinateLogger;
+use Garaekz\Cachelet\Support\CoordinateLogger;
 use Illuminate\Console\Command;
 
 class CacheletInspectCommand extends Command
 {
     protected $signature = 'cachelet:inspect {prefix}';
 
-    protected $description = 'Inspect cachelet metadata by prefix';
+    protected $description = 'Inspect cachelet metadata for a prefix';
 
-    public function handle(): int
+    public function handle(CoordinateLogger $logger): int
     {
-        $prefix = $this->argument('prefix');
-        $items = (new CoordinateLogger)->inspect($prefix);
-
-        foreach ($items as $meta) {
-            $this->line(json_encode($meta));
+        foreach ($logger->inspect((string) $this->argument('prefix')) as $metadata) {
+            $this->line(json_encode($metadata, JSON_UNESCAPED_SLASHES));
         }
 
-        return 0;
+        return self::SUCCESS;
     }
 }
