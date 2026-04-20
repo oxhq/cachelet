@@ -1,6 +1,6 @@
 <?php
 
-use Garaekz\Cachelet\Testing\ExpectCachelet;
+use Oxhq\Cachelet\Testing\ExpectCachelet;
 
 function expectCachelet(string $key): ExpectCachelet
 {

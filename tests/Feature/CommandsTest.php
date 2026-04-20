@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Garaekz\Cachelet\Facades\Cachelet;
 use Illuminate\Support\Facades\Cache;
+use Oxhq\Cachelet\Facades\Cachelet;
 
 beforeEach(function () {
     Cache::flush();

@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Garaekz\Cachelet\Facades\Cachelet;
-use Garaekz\Cachelet\Tests\Support\NoTagStore;
 use Illuminate\Cache\Repository;
 use Illuminate\Support\Facades\Cache;
+use Oxhq\Cachelet\Facades\Cachelet;
+use Oxhq\Cachelet\Tests\Support\NoTagStore;
 
 beforeEach(function () {
     Cache::flush();

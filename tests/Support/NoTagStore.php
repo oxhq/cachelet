@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Garaekz\Cachelet\Tests\Support;
+namespace Oxhq\Cachelet\Tests\Support;
 
 use Illuminate\Contracts\Cache\Store;
 

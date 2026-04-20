@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Tests\Models;
 
-use Garaekz\Cachelet\Traits\UsesCachelet;
 use Illuminate\Database\Eloquent\Model;
+use Oxhq\Cachelet\Traits\UsesCachelet;
 
 class Dummy extends Model
 {

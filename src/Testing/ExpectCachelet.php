@@ -1,6 +1,6 @@
 <?php
 
-namespace Garaekz\Cachelet\Testing;
+namespace Oxhq\Cachelet\Testing;
 
 use Illuminate\Support\Facades\Cache;
 

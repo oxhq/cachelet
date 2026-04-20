@@ -1,6 +1,6 @@
 <?php
 
-namespace Garaekz\Cachelet\Observers;
+namespace Oxhq\Cachelet\Observers;
 
 use Illuminate\Database\Eloquent\Model;
 

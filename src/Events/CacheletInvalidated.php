@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Garaekz\Cachelet\Events;
+namespace Oxhq\Cachelet\Events;
 
 class CacheletInvalidated
 {

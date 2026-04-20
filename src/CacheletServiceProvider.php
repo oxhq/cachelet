@@ -1,12 +1,12 @@
 <?php
 
-namespace Garaekz\Cachelet;
+namespace Oxhq\Cachelet;
 
-use Garaekz\Cachelet\Console\Commands\CacheletFlushCommand;
-use Garaekz\Cachelet\Console\Commands\CacheletInspectCommand;
-use Garaekz\Cachelet\Console\Commands\CacheletListCommand;
-use Garaekz\Cachelet\Support\CoordinateLogger;
 use Illuminate\Support\ServiceProvider;
+use Oxhq\Cachelet\Console\Commands\CacheletFlushCommand;
+use Oxhq\Cachelet\Console\Commands\CacheletInspectCommand;
+use Oxhq\Cachelet\Console\Commands\CacheletListCommand;
+use Oxhq\Cachelet\Support\CoordinateLogger;
 
 class CacheletServiceProvider extends ServiceProvider
 {

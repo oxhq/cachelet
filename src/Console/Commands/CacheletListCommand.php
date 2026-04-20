@@ -1,9 +1,9 @@
 <?php
 
-namespace Garaekz\Cachelet\Console\Commands;
+namespace Oxhq\Cachelet\Console\Commands;
 
-use Garaekz\Cachelet\Support\CoordinateLogger;
 use Illuminate\Console\Command;
+use Oxhq\Cachelet\Support\CoordinateLogger;
 
 class CacheletListCommand extends Command
 {

@@ -1,12 +1,11 @@
 {
-  "name": "garaekz/cachelet",
+  "name": "oxhq/cachelet",
   "description": "Declarative Caching DSL for Laravel",
   "type": "library",
   "license": "MIT",
   "authors": [
     {
-      "name": "David Garay",
-      "email": "garaekz@gmail.com"
+      "name": "OxHQ"
     }
   ],
   "require": {
@@ -22,26 +21,26 @@
   },
   "autoload": {
     "psr-4": {
-      "Garaekz\\Cachelet\\": "src/",
+      "Oxhq\\Cachelet\\": "src/",
       "Tests\\Models\\": "tests/Models/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Garaekz\\Cachelet\\Tests\\": "tests/"
+      "Oxhq\\Cachelet\\Tests\\": "tests/"
     }
   },
   "scripts": {
-    "test": "pest",
-    "format": "pint"
+    "test": "@php vendor/bin/pest",
+    "format": "@php vendor/bin/pint"
   },
   "extra": {
     "laravel": {
       "providers": [
-        "Garaekz\\Cachelet\\CacheletServiceProvider"
+        "Oxhq\\Cachelet\\CacheletServiceProvider"
       ],
       "aliases": {
-        "Cachelet": "Garaekz\\Cachelet\\Facades\\Cachelet"
+        "Cachelet": "Oxhq\\Cachelet\\Facades\\Cachelet"
       }
     }
   },

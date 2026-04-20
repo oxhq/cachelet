@@ -1,6 +1,6 @@
 <?php
 
-namespace Garaekz\Cachelet\Events;
+namespace Oxhq\Cachelet\Events;
 
 class CacheletHit
 {

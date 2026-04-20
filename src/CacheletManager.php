@@ -1,11 +1,11 @@
 <?php
 
-namespace Garaekz\Cachelet;
+namespace Oxhq\Cachelet;
 
-use Garaekz\Cachelet\Builders\CacheletBuilder;
-use Garaekz\Cachelet\Builders\ModelCacheletBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Traits\Macroable;
+use Oxhq\Cachelet\Builders\CacheletBuilder;
+use Oxhq\Cachelet\Builders\ModelCacheletBuilder;
 
 class CacheletManager
 {

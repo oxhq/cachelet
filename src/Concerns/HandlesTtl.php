@@ -1,6 +1,6 @@
 <?php
 
-namespace Garaekz\Cachelet\Concerns;
+namespace Oxhq\Cachelet\Concerns;
 
 use Closure;
 use Illuminate\Support\Carbon;

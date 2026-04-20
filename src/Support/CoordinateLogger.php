@@ -1,11 +1,11 @@
 <?php
 
-namespace Garaekz\Cachelet\Support;
+namespace Oxhq\Cachelet\Support;
 
-use Garaekz\Cachelet\ValueObjects\CacheCoordinate;
 use Illuminate\Cache\Repository;
 use Illuminate\Cache\TaggableStore;
 use Illuminate\Support\Facades\Cache;
+use Oxhq\Cachelet\ValueObjects\CacheCoordinate;
 
 class CoordinateLogger
 {

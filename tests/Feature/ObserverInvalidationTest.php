@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Garaekz\Cachelet\Events\CacheletInvalidated;
 use Illuminate\Cache\TaggableStore;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
+use Oxhq\Cachelet\Events\CacheletInvalidated;
 use Tests\Models\Dummy;
 
 beforeEach(function () {

@@ -1,9 +1,9 @@
 <?php
 
-namespace Garaekz\Cachelet\Builders;
+namespace Oxhq\Cachelet\Builders;
 
-use Garaekz\Cachelet\Events\CacheletInvalidated;
 use Illuminate\Database\Eloquent\Model;
+use Oxhq\Cachelet\Events\CacheletInvalidated;
 
 class ModelCacheletBuilder extends CacheletBuilder
 {

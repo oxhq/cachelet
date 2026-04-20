@@ -12,7 +12,7 @@ Declarative caching for Laravel with a single fluent builder API.
 ## Install
 
 ```bash
-composer require garaekz/cachelet
+composer require oxhq/cachelet
 ```
 
 Publish the config if you want to override defaults:
@@ -24,7 +24,7 @@ php artisan vendor:publish --tag=cachelet-config
 ## Usage
 
 ```php
-use Garaekz\Cachelet\Facades\Cachelet;
+use Oxhq\Cachelet\Facades\Cachelet;
 
 $value = Cachelet::for('users.index')
     ->from(['page' => 1, 'filters' => ['active' => true]])
@@ -44,7 +44,7 @@ $value = Cachelet::for('users.show')
 ### Model integration
 
 ```php
-use Garaekz\Cachelet\Traits\UsesCachelet;
+use Oxhq\Cachelet\Traits\UsesCachelet;
 
 class User extends Model
 {

@@ -1,13 +1,13 @@
 <?php
 
-namespace Garaekz\Cachelet\Builders;
+namespace Oxhq\Cachelet\Builders;
 
 use Closure;
-use Garaekz\Cachelet\Concerns\BuildsCache;
-use Garaekz\Cachelet\Concerns\GeneratesKeys;
-use Garaekz\Cachelet\Concerns\HandlesTtl;
-use Garaekz\Cachelet\Contracts\CacheletBuilderInterface;
-use Garaekz\Cachelet\ValueObjects\CacheCoordinate;
+use Oxhq\Cachelet\Concerns\BuildsCache;
+use Oxhq\Cachelet\Concerns\GeneratesKeys;
+use Oxhq\Cachelet\Concerns\HandlesTtl;
+use Oxhq\Cachelet\Contracts\CacheletBuilderInterface;
+use Oxhq\Cachelet\ValueObjects\CacheCoordinate;
 
 class CacheletBuilder implements CacheletBuilderInterface
 {

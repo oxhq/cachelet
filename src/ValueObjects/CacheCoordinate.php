@@ -1,6 +1,6 @@
 <?php
 
-namespace Garaekz\Cachelet\ValueObjects;
+namespace Oxhq\Cachelet\ValueObjects;
 
 use Illuminate\Support\Carbon;
 

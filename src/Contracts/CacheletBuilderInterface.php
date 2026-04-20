@@ -1,10 +1,10 @@
 <?php
 
-namespace Garaekz\Cachelet\Contracts;
+namespace Oxhq\Cachelet\Contracts;
 
 use Closure;
 use DateTimeInterface;
-use Garaekz\Cachelet\ValueObjects\CacheCoordinate;
+use Oxhq\Cachelet\ValueObjects\CacheCoordinate;
 
 interface CacheletBuilderInterface
 {

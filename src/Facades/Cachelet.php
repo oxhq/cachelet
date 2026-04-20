@@ -1,6 +1,6 @@
 <?php
 
-namespace Garaekz\Cachelet\Facades;
+namespace Oxhq\Cachelet\Facades;
 
 use Illuminate\Support\Facades\Facade;
 

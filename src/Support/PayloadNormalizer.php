@@ -1,6 +1,6 @@
 <?php
 
-namespace Garaekz\Cachelet\Support;
+namespace Oxhq\Cachelet\Support;
 
 use DateTimeInterface;
 use Illuminate\Contracts\Support\Arrayable;

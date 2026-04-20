@@ -1,10 +1,10 @@
 <?php
 
-namespace Garaekz\Cachelet\Traits;
+namespace Oxhq\Cachelet\Traits;
 
-use Garaekz\Cachelet\Builders\ModelCacheletBuilder;
-use Garaekz\Cachelet\Facades\Cachelet;
-use Garaekz\Cachelet\Observers\CacheletModelObserver;
+use Oxhq\Cachelet\Builders\ModelCacheletBuilder;
+use Oxhq\Cachelet\Facades\Cachelet;
+use Oxhq\Cachelet\Observers\CacheletModelObserver;
 
 trait UsesCachelet
 {

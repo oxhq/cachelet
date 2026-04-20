@@ -1,18 +1,18 @@
 <?php
 
-namespace Garaekz\Cachelet\Concerns;
+namespace Oxhq\Cachelet\Concerns;
 
 use Closure;
-use Garaekz\Cachelet\Events\CacheletHit;
-use Garaekz\Cachelet\Events\CacheletInvalidated;
-use Garaekz\Cachelet\Events\CacheletMiss;
-use Garaekz\Cachelet\Events\CacheletStored;
-use Garaekz\Cachelet\Support\CoordinateLogger;
 use Illuminate\Cache\Repository;
 use Illuminate\Cache\TaggableStore;
 use Illuminate\Cache\TaggedCache;
 use Illuminate\Support\Facades\Cache;
 use InvalidArgumentException;
+use Oxhq\Cachelet\Events\CacheletHit;
+use Oxhq\Cachelet\Events\CacheletInvalidated;
+use Oxhq\Cachelet\Events\CacheletMiss;
+use Oxhq\Cachelet\Events\CacheletStored;
+use Oxhq\Cachelet\Support\CoordinateLogger;
 
 trait BuildsCache
 {

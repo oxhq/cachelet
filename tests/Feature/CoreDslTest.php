@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-use Garaekz\Cachelet\Builders\CacheletBuilder;
-use Garaekz\Cachelet\Facades\Cachelet;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Oxhq\Cachelet\Builders\CacheletBuilder;
+use Oxhq\Cachelet\Facades\Cachelet;
 
 it('generates stable keys for reordered payloads', function () {
     $first = Cachelet::for('users')->from(['b' => 2, 'a' => 1]);

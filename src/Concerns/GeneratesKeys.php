@@ -1,8 +1,8 @@
 <?php
 
-namespace Garaekz\Cachelet\Concerns;
+namespace Oxhq\Cachelet\Concerns;
 
-use Garaekz\Cachelet\Support\PayloadNormalizer;
+use Oxhq\Cachelet\Support\PayloadNormalizer;
 use RuntimeException;
 
 trait GeneratesKeys

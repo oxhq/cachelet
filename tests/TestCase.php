@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Garaekz\Cachelet\Tests;
+namespace Oxhq\Cachelet\Tests;
 
-use Garaekz\Cachelet\CacheletServiceProvider;
-use Garaekz\Cachelet\Facades\Cachelet;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
 use Orchestra\Testbench\TestCase as Orchestra;
+use Oxhq\Cachelet\CacheletServiceProvider;
+use Oxhq\Cachelet\Facades\Cachelet;
 
 abstract class TestCase extends Orchestra
 {
