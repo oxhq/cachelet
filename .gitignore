@@ -1,0 +1,26 @@
+# Composer & vendor
+vendor/
+composer.lock
+
+# IDEs & editors
+.idea/
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# PHPUnit / Pest
+.phpunit.cache/
+
+# Coverage
+coverage/
+
+# Node / front
+node_modules/
+
+# Build artifacts
+*.log
+
+.DS_Store
+build/

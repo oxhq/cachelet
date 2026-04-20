@@ -1,0 +1,62 @@
+name: split
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - prefix: packages/cachelet-core
+            repo: oxhq/cachelet-core
+          - prefix: packages/cachelet-model
+            repo: oxhq/cachelet-model
+          - prefix: packages/cachelet-query
+            repo: oxhq/cachelet-query
+          - prefix: packages/cachelet-request
+            repo: oxhq/cachelet-request
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Configure SSH
+        env:
+          SPLIT_SSH_KEY_B64: ${{ secrets.CACHELET_SPLIT_SSH_KEY_B64 }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s' "$SPLIT_SSH_KEY_B64" | base64 -d > ~/.ssh/cachelet_split_key
+          chmod 600 ~/.ssh/cachelet_split_key
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          git config core.sshCommand "ssh -i ~/.ssh/cachelet_split_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Split subtree
+        run: git subtree split --prefix=${{ matrix.prefix }} --rejoin -b split-branch
+
+      - name: Push branch
+        run: |
+          git push --force "git@github.com:${{ matrix.repo }}.git" split-branch:main
+
+      - name: Push tag
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          git tag -f "${GITHUB_REF_NAME}" split-branch
+          git push --force "git@github.com:${{ matrix.repo }}.git" "refs/tags/${GITHUB_REF_NAME}"
+
+      - name: Cleanup
+        if: always()
+        run: git branch -D split-branch || true

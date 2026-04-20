@@ -1,0 +1,111 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  monorepo:
+    runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: cachelet_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d cachelet_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      CACHELET_REDIS_HOST: 127.0.0.1
+      CACHELET_REDIS_PORT: 6379
+      CACHELET_REDIS_DB: 2
+      CACHELET_PGSQL_HOST: 127.0.0.1
+      CACHELET_PGSQL_PORT: 5432
+      CACHELET_PGSQL_DATABASE: cachelet_test
+      CACHELET_PGSQL_USERNAME: postgres
+      CACHELET_PGSQL_PASSWORD: postgres
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - laravel: '12'
+            php: '8.2'
+            testbench: '^10.0'
+            pest: '^3.0'
+          - laravel: '12'
+            php: '8.3'
+            testbench: '^10.0'
+            pest: '^3.0'
+          - laravel: '12'
+            php: '8.4'
+            testbench: '^10.0'
+            pest: '^3.0'
+          - laravel: '12'
+            php: '8.5'
+            testbench: '^10.0'
+            pest: '^3.0'
+          - laravel: '13'
+            php: '8.3'
+            testbench: '^11.0'
+            pest: '^4.0'
+          - laravel: '13'
+            php: '8.4'
+            testbench: '^11.0'
+            pest: '^4.0'
+          - laravel: '13'
+            php: '8.5'
+            testbench: '^11.0'
+            pest: '^4.0'
+    name: Laravel ${{ matrix.laravel }} / PHP ${{ matrix.php }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          tools: composer
+          extensions: pdo_pgsql, redis
+
+      - name: Align testbench and pest for matrix target
+        run: |
+          composer require --dev orchestra/testbench:${{ matrix.testbench }} pestphp/pest:${{ matrix.pest }} --no-update
+          composer update --prefer-dist --no-interaction --no-progress -W
+
+      - name: Validate root composer metadata
+        run: composer validate --strict
+
+      - name: Validate package composer manifests
+        run: composer validate-packages
+
+      - name: Run static analysis
+        run: composer analyse
+
+      - name: Check coding style
+        run: composer format -- --test
+
+      - name: Run core suite
+        run: composer test:core
+
+      - name: Run model suite
+        run: composer test:model
+
+      - name: Run query suite
+        run: composer test:query
+
+      - name: Run request suite
+        run: composer test:request
+
+      - name: Run integration suite
+        run: composer test:integration
