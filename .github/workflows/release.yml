@@ -1,0 +1,39 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  validate-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          tools: composer
+          extensions: pdo_pgsql, redis
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Validate root composer metadata
+        run: composer validate --strict
+
+      - name: Validate package composer manifests
+        run: composer validate-packages
+
+      - name: Run static analysis
+        run: composer analyse
+
+      - name: Run full test suite
+        run: composer test
+
+      - name: Run cloud suite
+        run: composer test:cloud

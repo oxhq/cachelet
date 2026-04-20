@@ -1,0 +1,58 @@
+{
+  "name": "oxhq/cachelet-cloud",
+  "description": "First-party Cachelet Cloud exporter for canonical telemetry records.",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "OxHQ",
+      "homepage": "https://github.com/oxhq"
+    }
+  ],
+  "require": {
+    "php": "^8.2",
+    "illuminate/events": "^12.0|^13.0",
+    "illuminate/http": "^12.0|^13.0",
+    "illuminate/log": "^12.0|^13.0",
+    "illuminate/support": "^12.0|^13.0",
+    "oxhq/cachelet-core": "^0.2"
+  },
+  "require-dev": {
+    "orchestra/testbench": "^10.0|^11.0",
+    "phpunit/phpunit": "^11.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Oxhq\\Cachelet\\Cloud\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Oxhq\\Cachelet\\Cloud\\Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-main": "0.2.x-dev"
+    },
+    "laravel": {
+      "providers": [
+        "Oxhq\\Cachelet\\Cloud\\CacheletCloudServiceProvider"
+      ]
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "homepage": "https://github.com/oxhq/cachelet",
+  "keywords": [
+    "laravel",
+    "cache",
+    "telemetry",
+    "observability",
+    "cloud"
+  ],
+  "support": {
+    "issues": "https://github.com/oxhq/cachelet/issues",
+    "source": "https://github.com/oxhq/cachelet/tree/main/packages/cachelet-cloud"
+  }
+}

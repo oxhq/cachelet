@@ -1,0 +1,110 @@
+{
+  "name": "oxhq/cachelet",
+  "description": "The full Cachelet suite for Laravel.",
+  "type": "project",
+  "license": "MIT",
+  "homepage": "https://github.com/oxhq/cachelet",
+  "keywords": [
+    "laravel",
+    "cache",
+    "swr",
+    "invalidation",
+    "query-cache",
+    "response-cache"
+  ],
+  "support": {
+    "issues": "https://github.com/oxhq/cachelet/issues",
+    "source": "https://github.com/oxhq/cachelet"
+  },
+  "authors": [
+    {
+      "name": "OxHQ",
+      "homepage": "https://github.com/oxhq"
+    }
+  ],
+  "repositories": [
+    {
+      "type": "path",
+      "url": "packages/cachelet-core",
+      "options": {
+        "symlink": true
+      }
+    },
+    {
+      "type": "path",
+      "url": "packages/cachelet-model",
+      "options": {
+        "symlink": true
+      }
+    },
+    {
+      "type": "path",
+      "url": "packages/cachelet-query",
+      "options": {
+        "symlink": true
+      }
+    },
+    {
+      "type": "path",
+      "url": "packages/cachelet-request",
+      "options": {
+        "symlink": true
+      }
+    },
+    {
+      "type": "path",
+      "url": "packages/cachelet-cloud",
+      "options": {
+        "symlink": true
+      }
+    }
+  ],
+  "require": {
+    "php": "^8.2",
+    "oxhq/cachelet-core": "^0.2",
+    "oxhq/cachelet-model": "^0.2",
+    "oxhq/cachelet-query": "^0.2",
+    "oxhq/cachelet-request": "^0.2",
+    "oxhq/cachelet-cloud": "^0.2"
+  },
+  "require-dev": {
+    "larastan/larastan": "^3.9",
+    "laravel/pint": "^1.23",
+    "orchestra/testbench": "^10.0|^11.0",
+    "pestphp/pest": "^3.0|^4.0",
+    "phpstan/phpstan": "^2.1"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Oxhq\\Cachelet\\Tests\\": "tests/"
+    },
+    "classmap": [
+      "tests/"
+    ]
+  },
+  "scripts": {
+    "test": "@php vendor/bin/pest",
+    "test:core": "@php vendor/bin/pest tests/Feature/Core",
+    "test:model": "@php vendor/bin/pest tests/Feature/Model",
+    "test:query": "@php vendor/bin/pest tests/Feature/Query",
+    "test:request": "@php vendor/bin/pest tests/Feature/Request",
+    "test:cloud": "@php vendor/bin/phpunit -c packages/cachelet-cloud/phpunit.xml.dist",
+    "test:integration": "@php vendor/bin/pest tests/Feature/Integration",
+    "format": "@php vendor/bin/pint",
+    "analyse": "@php vendor/bin/phpstan analyse --memory-limit=1G",
+    "validate-packages": "@php tools/validate-packages.php"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    },
+    "sort-packages": true
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-main": "0.2.x-dev"
+    }
+  }
+}
