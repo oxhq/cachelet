@@ -8,8 +8,9 @@
   - `https://github.com/oxhq/cachelet-model`
   - `https://github.com/oxhq/cachelet-query`
   - `https://github.com/oxhq/cachelet-request`
-- First public tag: `v0.1.0`
-- Release page: `https://github.com/oxhq/cachelet/releases/tag/v0.1.0`
+- `https://github.com/oxhq/cachelet-exporter`
+- Current release tag: `v0.2.1`
+- Release page: `https://github.com/oxhq/cachelet/releases/tag/v0.2.1`
 
 ## Packagist
 
@@ -44,5 +45,6 @@ Public package topology:
 - `oxhq/cachelet-model`
 - `oxhq/cachelet-query`
 - `oxhq/cachelet-request`
+- `oxhq/cachelet-exporter`
 
 The root repository publishes `oxhq/cachelet`. The focused packages are published from split repositories, not from Packagist indexing subdirectories of the monorepo.

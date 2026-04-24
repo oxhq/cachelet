@@ -1,5 +1,43 @@
 # Changelog
 
+## [0.2.1] - 2026-04-24
+
+Scoped intervention hardening release for the Cachelet family.
+
+### Added
+
+- explicit `scope(...)` support across model, query, and request builders for intervention boundaries
+- structured preview, receipt, and verification contracts for scoped interventions
+
+### Fixed
+
+- static analysis regressions in scoped builder integration
+- local `composer analyse` execution on Windows by calling the PHPStan binary directly
+
+### Changed
+
+- `main` is reset to a two-commit release history: `v0.1.0` and the current `0.2.x` line
+
+## [0.2.0] - 2026-04-20
+
+Cloud-readiness release for the Cachelet family.
+
+### Added
+
+- canonical coordinate and telemetry contracts across `core`, `model`, `query`, and `request`
+- first-party Cloud exporter package with `null`, `log`, `http`, and custom transport support
+- operator and benchmark documentation for the family contract
+
+### Renamed
+
+- public package name `oxhq/cachelet-cloud` to `oxhq/cachelet-exporter` to avoid collision with the hosted Cachelet Cloud app naming
+
+### Changed
+
+- coordinate projections now carry module, version, store, and SWR policy data
+- store projection resolves the actual repository path instead of assuming the default driver
+- SWR telemetry distinguishes policy from actual runtime usage
+
 ## [0.1.0] - 2026-04-20
 
 First public release of the Cachelet package family.

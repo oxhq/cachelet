@@ -8,11 +8,12 @@ Cachelet gives Laravel teams one consistent way to define cache keys, apply TTL 
 
 | Package | Use it for |
 | --- | --- |
-| `oxhq/cachelet` | Full suite: core + model + query + request integrations |
+| `oxhq/cachelet` | Full suite: core + model + query + request + exporter integrations |
 | `oxhq/cachelet-core` | Generic cache builders, TTL/SWR, invalidation, inspection, events, locks |
 | `oxhq/cachelet-model` | Eloquent model builders, payload shaping, observer invalidation |
 | `oxhq/cachelet-query` | Query builder and Eloquent result caching |
 | `oxhq/cachelet-request` | Request and response caching middleware and route integration |
+| `oxhq/cachelet-exporter` | First-party exporter for canonical Cachelet telemetry |
 
 ## Install
 
@@ -29,6 +30,7 @@ composer require oxhq/cachelet-core
 composer require oxhq/cachelet-model
 composer require oxhq/cachelet-query
 composer require oxhq/cachelet-request
+composer require oxhq/cachelet-exporter
 ```
 
 ## Quick Start
@@ -92,6 +94,30 @@ Route::get('/users', UserIndexController::class)
 - Stale-while-revalidate with locking and null-safe cache envelopes
 - Typed cache lifecycle events and coordinate inspection commands
 - Focused Laravel integrations for models, queries, and requests
+- A first-party Cloud exporter for the canonical telemetry stream
+
+## Operator Contract
+
+Cachelet now exposes one canonical coordinate shape across the family. Every coordinate and telemetry record carries:
+
+- `module`: one of `core`, `model`, `query`, or `request`
+- `prefix`, `key`, `ttl`, `version`, `store`, `tags`
+- `swr`: refresh mode and lock/grace settings
+- `metadata`: module-specific fields such as `model_class`, `table`, `route`, or `method`
+
+When `cachelet.observability.events.enabled` is on, Cachelet emits:
+
+- legacy lifecycle events such as `CacheletHit` and `CacheletInvalidated`
+- `CacheletTelemetryRecorded` as the canonical operational event for external consumers
+
+That event wraps a `cachelet.telemetry.v1` projection with the event name, timestamp, coordinate projection, and operation context.
+
+`oxhq/cachelet-exporter` listens to that telemetry stream and exports `cachelet.cloud.export.v1` payloads through `http`, `log`, `null`, or custom transports.
+
+See:
+
+- [`docs/operations.md`](docs/operations.md)
+- [`docs/benchmarks.md`](docs/benchmarks.md)
 
 ## Support Matrix
 
@@ -101,7 +127,7 @@ Route::get('/users', UserIndexController::class)
 
 ## Stability
 
-`0.1.x` is intended to be production-usable. The package family is still early, so focused API tightening may happen before `1.0` if real-world usage exposes a better contract.
+`0.2.x` is intended to be production-usable. The package family is still early, so focused API tightening may happen before `1.0` if real-world usage exposes a better contract.
 
 ## Development
 

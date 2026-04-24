@@ -9,6 +9,7 @@ This repository is the public source of truth for the Cachelet package family.
 - `packages/cachelet-model` - Eloquent integration
 - `packages/cachelet-query` - query integration
 - `packages/cachelet-request` - request and response integration
+- `packages/cachelet-exporter` - first-party telemetry export integration
 
 Package release mirrors are published from this repository into dedicated public repositories.
 Additional maintainer notes are in `docs/monorepo.md`.

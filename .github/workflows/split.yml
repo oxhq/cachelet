@@ -23,6 +23,8 @@ jobs:
             repo: oxhq/cachelet-query
           - prefix: packages/cachelet-request
             repo: oxhq/cachelet-request
+          - prefix: packages/cachelet-exporter
+            repo: oxhq/cachelet-exporter
     steps:
       - uses: actions/checkout@v5
         with:

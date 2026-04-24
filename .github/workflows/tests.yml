@@ -107,5 +107,8 @@ jobs:
       - name: Run request suite
         run: composer test:request
 
+      - name: Run exporter suite
+        run: composer test:exporter
+
       - name: Run integration suite
         run: composer test:integration

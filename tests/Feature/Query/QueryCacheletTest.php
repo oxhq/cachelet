@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Illuminate\Cache\TaggableStore;
 use Illuminate\Support\Facades\Cache;
 use Oxhq\Cachelet\Query\Support\QueryCacheletManager;
+use Oxhq\Cachelet\ValueObjects\CacheScope;
 use Tests\Models\Dummy;
 
 beforeEach(function () {
@@ -21,7 +22,34 @@ it('builds stable keys from sql bindings and connection data', function () {
     $third = Dummy::query()->where('role', 'staff')->cachelet();
 
     expect($first->key())->toBe($second->key())
+        ->and($first->coordinate()->module)->toBe('query')
+        ->and($first->coordinate()->metadata['type'])->toBe('query')
         ->and($third->key())->not->toBe($first->key());
+});
+
+it('prefers an explicit scope over the inferred query scope', function () {
+    $projection = Dummy::query()
+        ->where('role', 'admin')
+        ->cachelet()
+        ->scope(CacheScope::named('catalog.users'))
+        ->coordinate()
+        ->toProjection();
+
+    expect($projection['scope'])->toMatchArray([
+        'contract' => 'cachelet.scope.v1',
+        'identifier' => 'catalog.users',
+        'source' => 'explicit',
+    ]);
+});
+
+it('infers a stable scope from the query table grouping', function () {
+    $first = Dummy::query()->where('role', 'admin')->cachelet()->coordinate()->toProjection();
+    $second = Dummy::query()->where('role', 'staff')->cachelet()->coordinate()->toProjection();
+
+    expect($first['scope']['source'])->toBe('inferred')
+        ->and($second['scope']['source'])->toBe('inferred')
+        ->and($first['scope']['identifier'])->not->toBe('')
+        ->and($first['scope']['identifier'])->toBe($second['scope']['identifier']);
 });
 
 it('caches query results and invalidates them by table prefix', function () {

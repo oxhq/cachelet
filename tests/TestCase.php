@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Schema;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Oxhq\Cachelet\CacheletModelServiceProvider;
 use Oxhq\Cachelet\CacheletServiceProvider;
+use Oxhq\Cachelet\Exporter\CacheletExporterServiceProvider;
 use Oxhq\Cachelet\Facades\Cachelet;
 use Oxhq\Cachelet\Query\Facades\CacheletQuery;
 use Oxhq\Cachelet\Query\Providers\CacheletQueryServiceProvider;
@@ -26,6 +27,7 @@ abstract class TestCase extends Orchestra
             CacheletModelServiceProvider::class,
             CacheletQueryServiceProvider::class,
             CacheletRequestServiceProvider::class,
+            CacheletExporterServiceProvider::class,
         ];
     }
 
@@ -57,6 +59,8 @@ abstract class TestCase extends Orchestra
         $app['config']->set('cachelet.query.default_prefix', 'query');
         $app['config']->set('cachelet.request.default_prefix', 'request');
         $app['config']->set('cachelet.request.middleware_alias', 'cachelet');
+        $app['config']->set('cachelet-exporter.enabled', false);
+        $app['config']->set('cachelet-exporter.transport', 'null');
 
         $app['config']->set('database.default', 'sqlite');
         $app['config']->set('database.connections.sqlite', [

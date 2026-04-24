@@ -7,6 +7,7 @@ $packages = [
     'packages/cachelet-model',
     'packages/cachelet-query',
     'packages/cachelet-request',
+    'packages/cachelet-exporter',
 ];
 
 foreach ($packages as $package) {

@@ -34,3 +34,6 @@ jobs:
 
       - name: Run full test suite
         run: composer test
+
+      - name: Run exporter suite
+        run: composer test:exporter

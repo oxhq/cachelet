@@ -2,13 +2,58 @@
 
 declare(strict_types=1);
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Oxhq\Cachelet\Request\Support\CacheletRequestManager;
+use Oxhq\Cachelet\Request\Support\ResponseCacheProfile;
+use Oxhq\Cachelet\ValueObjects\CacheScope;
 use Tests\Models\TestUser;
 
 beforeEach(function () {
     Cache::flush();
+});
+
+it('stamps request coordinates with a canonical module discriminator', function () {
+    $profile = app(CacheletRequestManager::class)->for(request(), 'users');
+    $coordinate = $profile->builder()->coordinate();
+
+    expect($profile)->toBeInstanceOf(ResponseCacheProfile::class)
+        ->and($coordinate->module)->toBe('request')
+        ->and($coordinate->metadata['type'])->toBe('request');
+});
+
+it('prefers an explicit scope over the inferred request scope', function () {
+    $profile = app(CacheletRequestManager::class)->for(request(), 'users');
+    $projection = $profile->builder()
+        ->scope(CacheScope::named('edge.users'))
+        ->coordinate()
+        ->toProjection();
+
+    expect($projection['scope'])->toMatchArray([
+        'contract' => 'cachelet.scope.v1',
+        'identifier' => 'edge.users',
+        'source' => 'explicit',
+    ]);
+});
+
+it('infers a stable scope from the request namespace grouping', function () {
+    $first = app(CacheletRequestManager::class)
+        ->for(Request::create('/users', 'GET'), null, ['namespace' => 'users'])
+        ->builder()
+        ->coordinate()
+        ->toProjection();
+
+    $second = app(CacheletRequestManager::class)
+        ->for(Request::create('/users?role=admin', 'GET'), null, ['namespace' => 'users'])
+        ->builder()
+        ->coordinate()
+        ->toProjection();
+
+    expect($first['scope']['source'])->toBe('inferred')
+        ->and($second['scope']['source'])->toBe('inferred')
+        ->and($first['scope']['identifier'])->not->toBe('')
+        ->and($first['scope']['identifier'])->toBe($second['scope']['identifier']);
 });
 
 it('caches route responses and varies by query parameters', function () {

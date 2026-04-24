@@ -50,14 +50,22 @@
       "options": {
         "symlink": true
       }
+    },
+    {
+      "type": "path",
+      "url": "packages/cachelet-exporter",
+      "options": {
+        "symlink": true
+      }
     }
   ],
   "require": {
     "php": "^8.2",
-    "oxhq/cachelet-core": "^0.1",
-    "oxhq/cachelet-model": "^0.1",
-    "oxhq/cachelet-query": "^0.1",
-    "oxhq/cachelet-request": "^0.1"
+    "oxhq/cachelet-core": "^0.2",
+    "oxhq/cachelet-model": "^0.2",
+    "oxhq/cachelet-query": "^0.2",
+    "oxhq/cachelet-request": "^0.2",
+    "oxhq/cachelet-exporter": "^0.2"
   },
   "require-dev": {
     "larastan/larastan": "^3.9",
@@ -80,9 +88,10 @@
     "test:model": "@php vendor/bin/pest tests/Feature/Model",
     "test:query": "@php vendor/bin/pest tests/Feature/Query",
     "test:request": "@php vendor/bin/pest tests/Feature/Request",
+    "test:exporter": "@php vendor/bin/phpunit -c packages/cachelet-exporter/phpunit.xml.dist",
     "test:integration": "@php vendor/bin/pest tests/Feature/Integration",
     "format": "@php vendor/bin/pint",
-    "analyse": "@php vendor/bin/phpstan analyse --memory-limit=1G",
+    "analyse": "@php vendor/phpstan/phpstan/phpstan analyse --memory-limit=1G",
     "validate-packages": "@php tools/validate-packages.php"
   },
   "minimum-stability": "dev",
@@ -95,7 +104,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-main": "0.1.x-dev"
+      "dev-main": "0.2.x-dev"
     }
   }
 }

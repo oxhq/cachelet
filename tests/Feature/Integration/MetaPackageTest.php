@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use Oxhq\Cachelet\Exporter\Exporting\TelemetryExporter;
 use Oxhq\Cachelet\Facades\Cachelet;
 use Oxhq\Cachelet\Query\Facades\CacheletQuery;
 use Oxhq\Cachelet\Request\Facades\CacheletRequest;
@@ -12,11 +14,23 @@ it('installs the full suite through the meta package', function () {
     Cache::flush();
 
     $core = Cachelet::for('meta-suite')->from(['ok' => true])->remember(fn () => 'value');
+    $model = Dummy::create(['name' => 'Alice'])->cachelet();
     $query = Dummy::query()->cachelet();
+    $request = app('cachelet.request')->for(Request::create('/users', 'GET'), 'users');
 
     expect($core)->toBe('value')
+        ->and(Cachelet::for('meta-suite')->from(['ok' => true])->coordinate()->toProjection()['scope']['source'])->toBe('inferred')
+        ->and($model->coordinate()->module)->toBe('model')
+        ->and($model->coordinate()->metadata['type'])->toBe('model')
+        ->and($model->coordinate()->toProjection()['scope']['source'])->toBe('inferred')
         ->and($query->coordinate()->metadata['type'])->toBe('query')
+        ->and($query->coordinate()->module)->toBe('query')
+        ->and($query->coordinate()->toProjection()['scope']['source'])->toBe('inferred')
+        ->and($request->builder()->coordinate()->module)->toBe('request')
+        ->and($request->builder()->coordinate()->metadata['type'])->toBe('request')
+        ->and($request->builder()->coordinate()->toProjection()['scope']['source'])->toBe('inferred')
         ->and(app()->bound('cachelet.request'))->toBeTrue()
+        ->and(app()->bound(TelemetryExporter::class))->toBeTrue()
         ->and(CacheletQuery::prefixFor('dummies'))->toBe('query:dummies')
         ->and(CacheletRequest::invalidatePrefix('missing'))->toBeArray();
 });
