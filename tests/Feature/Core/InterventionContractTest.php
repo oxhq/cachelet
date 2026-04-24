@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-use Illuminate\Contracts\Cache\Repository;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
-use Oxhq\Cachelet\Builders\CacheletBuilder;
 use Oxhq\Cachelet\Facades\Cachelet;
 use Oxhq\Cachelet\ValueObjects\CacheScope;
 use Oxhq\Cachelet\ValueObjects\InterventionPreview;
@@ -115,23 +114,34 @@ it('keeps legacy invalidation helpers compatible with scoped interventions', fun
 
 it('executes scoped interventions against the coordinate store instead of the default store', function () {
     config(['cache.default' => 'array']);
-
-    $builder = new class('users.index', config('cachelet')) extends CacheletBuilder
-    {
-        protected function resolveRepository(): Repository
-        {
-            return Cache::store('file');
-        }
-    };
-
-    $builder
+    $builder = Cachelet::for('users.index')
+        ->onStore('file')
         ->scope(CacheScope::named('agency.users'))
-        ->from(['page' => 1])
-        ->remember(fn (): array => ['id' => 1]);
+        ->from(['page' => 1]);
+
+    $builder->remember(fn (): array => ['id' => 1]);
 
     expect(Cache::store('file')->has($builder->key()))->toBeTrue();
 
     Cachelet::interventions()->forScope(CacheScope::named('agency.users'))->execute();
 
     expect(Cache::store('file')->has($builder->key()))->toBeFalse();
+});
+
+it('keeps scope interventions available while an swr entry is inside the grace window', function () {
+    $builder = Cachelet::for('users.index')
+        ->scope(CacheScope::named('agency.users'))
+        ->from(['page' => 1])
+        ->ttl(60);
+
+    $builder->staleWhileRevalidate(fn (): array => ['id' => 1]);
+
+    Carbon::setTestNow(Carbon::now()->addSeconds(61));
+
+    $preview = Cachelet::interventions()
+        ->forScope(CacheScope::named('agency.users'))
+        ->preview()
+        ->toArray();
+
+    expect($preview['matched_coordinate_count'])->toBeGreaterThanOrEqual(1);
 });

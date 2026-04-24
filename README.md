@@ -42,6 +42,7 @@ use Oxhq\Cachelet\Facades\Cachelet;
 
 $users = Cachelet::for('users.index')
     ->from(['page' => 1, 'role' => 'admin'])
+    ->onStore('redis')
     ->ttl('+15 minutes')
     ->remember(fn () => User::query()->where('role', 'admin')->paginate());
 ```
@@ -92,7 +93,9 @@ Route::get('/users', UserIndexController::class)
 - Deterministic cache keys built from normalized payloads
 - Exact-key invalidation and store-agnostic prefix invalidation
 - Stale-while-revalidate with locking and null-safe cache envelopes
+- Explicit `onStore(...)` selection for cache values when sidecars or defaults live elsewhere
 - Typed cache lifecycle events and coordinate inspection commands
+- Sidecar maintenance via `cachelet:prune` for registry and telemetry cleanup
 - Focused Laravel integrations for models, queries, and requests
 - A first-party Cloud exporter for the canonical telemetry stream
 

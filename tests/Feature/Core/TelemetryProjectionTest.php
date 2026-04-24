@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
-use Oxhq\Cachelet\Builders\CacheletBuilder;
 use Oxhq\Cachelet\Events\CacheletTelemetryRecorded;
 use Oxhq\Cachelet\Exporter\Contracts\ExporterClient;
 use Oxhq\Cachelet\ValueObjects\CacheCoordinate;
@@ -102,16 +100,11 @@ it('distinguishes swr policy from runtime swr usage in telemetry', function () {
 
 it('projects the actual resolved store instead of the default driver', function () {
     config(['cache.default' => 'array']);
+    $builder = Cachelet::for('users.index')
+        ->onStore('file')
+        ->from(['page' => 1]);
 
-    $builder = new class('users.index', config('cachelet')) extends CacheletBuilder
-    {
-        protected function resolveRepository(): Repository
-        {
-            return Cache::store('file');
-        }
-    };
-
-    $builder->from(['page' => 1])->remember(fn () => ['id' => 1]);
+    $builder->remember(fn () => ['id' => 1]);
 
     expect($builder->coordinate()->store)->toBe('file');
 
@@ -119,6 +112,29 @@ it('projects the actual resolved store instead of the default driver', function 
         return $event->record->event === 'stored'
             && $event->record->coordinate->store === 'file'
             && $event->record->toArray()['store'] === 'file';
+    });
+});
+
+it('can keep registry and telemetry sidecars on a dedicated store', function () {
+    config([
+        'cachelet.registry.store' => 'file',
+        'cachelet.telemetry.store' => 'file',
+    ]);
+
+    Cache::store('file')->flush();
+
+    $builder = Cachelet::for('users.index')
+        ->scope(CacheScope::named('agency.users'))
+        ->from(['page' => 1]);
+
+    $builder->remember(fn () => ['id' => 1]);
+    Cache::store('array')->flush();
+
+    expect(Cachelet::interventions()->forScope('agency.users')->preview()->matchedCoordinateCount)
+        ->toBeGreaterThanOrEqual(1);
+
+    Event::assertDispatched(CacheletTelemetryRecorded::class, function (CacheletTelemetryRecorded $event) {
+        return $event->record->coordinate->scope?->identifier === 'agency.users';
     });
 });
 

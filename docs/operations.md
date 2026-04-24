@@ -81,3 +81,17 @@ By default:
 - bypassed: streamed responses, binary file responses
 
 Vary dimensions are opt-in and inspectable through the request coordinate metadata.
+
+## Sidecar Maintenance
+
+Cachelet keeps registry and telemetry sidecars so inspection, scoped interventions, and verification can work across modules.
+
+If cache values are cleared out-of-band or sidecars outlive their cached entries, run:
+
+```bash
+php artisan cachelet:prune
+```
+
+That command removes orphaned registry coordinates and prunes expired telemetry records using the configured `cachelet.registry.*` and `cachelet.telemetry.*` settings.
+
+When cache values should live on a specific store, set it explicitly on the builder with `onStore(...)` so the coordinate projection, invalidation path, and sidecar verification all point at the real backing store.

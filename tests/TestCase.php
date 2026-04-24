@@ -53,6 +53,15 @@ abstract class TestCase extends Orchestra
         $app['config']->set('cachelet.stale.grace_ttl', 300);
         $app['config']->set('cachelet.locks.fill_ttl', 30);
         $app['config']->set('cachelet.locks.fill_wait', 5);
+        $app['config']->set('cachelet.registry.store', null);
+        $app['config']->set('cachelet.registry.prefix', 'cachelet:registry');
+        $app['config']->set('cachelet.registry.metadata_ttl', null);
+        $app['config']->set('cachelet.registry.lock_ttl', 10);
+        $app['config']->set('cachelet.registry.lock_wait', 5);
+        $app['config']->set('cachelet.telemetry.store', null);
+        $app['config']->set('cachelet.telemetry.prefix', 'cachelet:telemetry');
+        $app['config']->set('cachelet.telemetry.per_scope_limit', 100);
+        $app['config']->set('cachelet.telemetry.retention', 86400);
         $app['config']->set('cachelet.serialization.exclude_dates', true);
         $app['config']->set('cachelet.serialization.default_excludes', []);
         $app['config']->set('cachelet.serialization.default_only', []);
