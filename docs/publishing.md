@@ -9,8 +9,8 @@
   - `https://github.com/oxhq/cachelet-query`
   - `https://github.com/oxhq/cachelet-request`
 - `https://github.com/oxhq/cachelet-exporter`
-- Current release tag: `v0.2.1`
-- Release page: `https://github.com/oxhq/cachelet/releases/tag/v0.2.1`
+- Current release tag: `v0.2.2`
+- Release page: `https://github.com/oxhq/cachelet/releases/tag/v0.2.2`
 
 ## Packagist
 

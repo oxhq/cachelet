@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.2.2] - 2026-04-25
+
+Runtime hardening release for the Cachelet family.
+
+### Added
+
+- `cachelet:prune` for sidecar maintenance of registry and telemetry data
+- explicit `onStore(...)` support for routing cache operations to a chosen store
+
+### Fixed
+
+- request cache bypass behavior for streamed, binary, and other non-cacheable responses
+- SWR refresh behavior so a non-cacheable refresh response preserves the last cacheable response
+- scope and sidecar handling for dedicated cache stores
+
+### Changed
+
+- release verification now includes live Redis and PostgreSQL integration coverage on the local release machine
+
 ## [0.2.1] - 2026-04-24
 
 Scoped intervention hardening release for the Cachelet family.
