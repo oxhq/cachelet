@@ -1,8 +1,10 @@
-# Operations
+# Operations Contract
 
-Cachelet answers the same operator questions across `core`, `model`, `query`, and `request`.
+Cachelet is built around cache coordinates. A coordinate is the stable description of a cache entry: module, prefix, key, store, TTL, tags, SWR policy, scope, and metadata.
 
-## Canonical Coordinate
+That contract lets a Laravel team inspect and recover cache families without treating the cache store as a black box.
+
+## Coordinates
 
 Every builder resolves to `cachelet.coordinate.v1` with:
 
@@ -15,25 +17,39 @@ Every builder resolves to `cachelet.coordinate.v1` with:
 - `tags`
 - `swr`
 - `metadata`
+- `scope`
 
-`swr` is the policy projection for that coordinate:
+Module-specific metadata is normalized:
 
-- `capable`: whether the coordinate can participate in SWR
-- `configured`: whether SWR is configured for that coordinate
-- refresh and lock/grace settings
+- `model`: model class and model key
+- `query`: table, connection, SQL, bindings, and pagination inputs
+- `request`: route, method, path, and vary dimensions
 
-Module-specific metadata is normalized rather than inferred:
+## Stale-While-Revalidate
 
-- `model`: `model_class`, `model_key`
-- `query`: `table`, `connection`
-- `request`: `route`, `method`, `path`
+The `swr` projection describes both policy and runtime behavior.
 
-## Canonical Telemetry
+Policy answers:
+
+- whether the coordinate can participate in SWR
+- whether SWR is configured
+- refresh mode
+- lock TTL
+- grace TTL
+
+Runtime telemetry can then report:
+
+- whether SWR was requested
+- whether stale data was served
+- whether refresh ran in the background
+- whether the entry was fresh, stale, missing, or refreshed
+
+## Telemetry
 
 When `cachelet.observability.events.enabled` is enabled, Cachelet emits:
 
-- convenience lifecycle events such as `CacheletHit`, `CacheletMiss`, `CacheletStored`, `CacheletInvalidated`
-- `CacheletTelemetryRecorded` as the operational contract
+- convenience lifecycle events such as `CacheletHit`, `CacheletMiss`, `CacheletStored`, and `CacheletInvalidated`
+- `CacheletTelemetryRecorded` as the canonical operational event
 
 `CacheletTelemetryRecorded` wraps `cachelet.telemetry.v1`:
 
@@ -42,56 +58,54 @@ When `cachelet.observability.events.enabled` is enabled, Cachelet emits:
 - `coordinate`
 - `context`
 
-Context answers the runtime questions Cloud and operators usually need:
+Context carries runtime details such as access strategy, entry state, SWR runtime, invalidation reason, affected keys, and value type.
 
-- `access_strategy`
-- `entry_state`
-- `background`
-- `swr_runtime`
-- `reason`
-- `keys`
-- `value_type`
+## Invalidation
 
-`swr_runtime` is the access-path projection:
+Cachelet supports exact-key and family invalidation through the same coordinate model.
 
-- `requested`
-- `background_refresh`
-- `served_stale`
-- `entry_state`
+Common boundaries:
+
+- exact key
+- prefix
+- supported store tags
+- explicit scope
+- inferred module scope
+
+Scoped interventions return preview, receipt, and verification projections. That distinction matters: deleting keys is not the same as proving fresh data recovered.
 
 ## Query Guarantees
 
-`cachelet-query` gives deterministic keys from:
+`cachelet-query` creates deterministic keys from:
 
 - SQL
 - bindings
 - connection
+- table grouping
 - pagination inputs
 
-It guarantees explicit invalidation by prefix/tag. It does not guarantee automatic relational invalidation in `0.2.x`.
+It guarantees explicit invalidation by query-table prefix and tags. It does not guarantee automatic relational invalidation for arbitrary query graphs in `0.2.x`.
 
 ## Request Guarantees
 
-`cachelet-request` guarantees explicit vary dimensions and explicit bypass rules.
+`cachelet-request` gives route response caching with explicit vary dimensions and bypass behavior.
 
-By default:
+Defaults:
 
 - cacheable methods: `GET`, `HEAD`
 - cacheable statuses: `200`
-- bypassed: streamed responses, binary file responses
+- bypassed responses: streamed responses and binary file responses
 
-Vary dimensions are opt-in and inspectable through the request coordinate metadata.
+Vary dimensions are opt-in and inspectable through request coordinate metadata.
 
-## Sidecar Maintenance
+## Sidecars
 
 Cachelet keeps registry and telemetry sidecars so inspection, scoped interventions, and verification can work across modules.
 
-If cache values are cleared out-of-band or sidecars outlive their cached entries, run:
+If cache values are cleared outside Cachelet or sidecars outlive cached entries, run:
 
 ```bash
 php artisan cachelet:prune
 ```
 
-That command removes orphaned registry coordinates and prunes expired telemetry records using the configured `cachelet.registry.*` and `cachelet.telemetry.*` settings.
-
-When cache values should live on a specific store, set it explicitly on the builder with `onStore(...)` so the coordinate projection, invalidation path, and sidecar verification all point at the real backing store.
+When values should live on a specific store, use `onStore(...)` so the coordinate projection, invalidation path, and sidecar verification point at the real backing store.

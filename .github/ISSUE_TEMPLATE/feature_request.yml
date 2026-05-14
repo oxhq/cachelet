@@ -1,0 +1,44 @@
+name: Feature request
+description: Propose a focused addition to the Cachelet package family.
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What cache workflow or operational question is difficult today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the smallest API, command, or package behavior that would solve it.
+    validations:
+      required: true
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package area
+      options:
+        - cachelet-core
+        - cachelet-model
+        - cachelet-query
+        - cachelet-request
+        - cachelet-exporter
+        - documentation
+        - not sure
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Existing Laravel primitives or packages you considered.
+  - type: textarea
+    id: proof
+    attributes:
+      label: Proof of need
+      description: Real app context, failing workflow, or repeated operator task this would improve.

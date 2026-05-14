@@ -1,8 +1,8 @@
 # cachelet-model
 
-Read-only split of the Cachelet monorepo package at `packages/cachelet-model`.
+Eloquent model caching with Cachelet coordinates.
 
-Eloquent model integration for Cachelet.
+`cachelet-model` gives model-derived cache entries a stable module identity, inspectable key payloads, and observer-driven invalidation for model cache families.
 
 ## Install
 
@@ -10,19 +10,21 @@ Eloquent model integration for Cachelet.
 composer require oxhq/cachelet-model
 ```
 
-## Features
+## Best Fit
 
-- `Cachelet::forModel($model)`
+Use this package when stale model variants and invalidation blast radius are the main pain.
+
+It provides:
+
+- `Cachelet::forModel(...)`
 - `$model->cachelet()`
-- `scope(...)` for explicit intervention boundaries
-- `only()`, `exclude()`, `withDates()`, `withTimestamps()`
-- Observer-driven invalidation
-- Canonical `module = model` coordinates and telemetry
+- `only(...)`, `exclude(...)`, `withDates()`, and `withTimestamps()`
+- observer-driven invalidation for model prefixes
+- canonical `module = model` coordinates and telemetry
 
 ## Example
 
 ```php
-use Oxhq\Cachelet\ValueObjects\CacheScope;
 use Oxhq\Cachelet\Traits\UsesCachelet;
 
 class User extends Model
@@ -30,12 +32,14 @@ class User extends Model
     use UsesCachelet;
 }
 
-$scope = /* CacheScope instance for the intervention boundary */;
-
 $profile = $user->cachelet()
-    ->scope($scope)
     ->exclude(['updated_at'])
+    ->ttl(300)
     ->remember(fn () => $user->fresh());
 ```
 
-If you do not define a scope explicitly, `cachelet-model` infers one from the model cache prefix boundary it already uses for invalidation.
+## Docs
+
+- [`../../docs/operations.md`](../../docs/operations.md)
+- [`../../docs/migration.md`](../../docs/migration.md)
+- [`../../docs/install-matrix.md`](../../docs/install-matrix.md)

@@ -1,20 +1,36 @@
-# Monorepo Notes
+# Monorepo
 
-## Purpose
+This repository is the public source of truth for the Cachelet package family.
 
-The repository hosts the full Cachelet package family in one place so shared tests, CI, release tooling, and subtree splits stay aligned.
+## Packages
 
-## Package Boundaries
+- `oxhq/cachelet`: full-suite install target
+- `packages/cachelet-core`: coordinates, builders, normalization, TTL/SWR, locking, invalidation, inspection, events, and generic Laravel wiring
+- `packages/cachelet-model`: Eloquent model integration and observer invalidation
+- `packages/cachelet-query`: query builder and Eloquent result caching
+- `packages/cachelet-request`: request/response route caching
+- `packages/cachelet-exporter`: optional telemetry export for external tooling
 
-- root package `oxhq/cachelet` is the full-suite install target.
-- `cachelet-core` owns cache coordinates, builders, normalization, TTL/SWR, locking, invalidation, inspection, events, and generic Laravel wiring.
-- `cachelet-model` owns model-aware builders, payload shaping, and model lifecycle invalidation.
-- `cachelet-query` owns query builder and Eloquent integration.
-- `cachelet-request` owns request and response caching integration.
-- `cachelet-exporter` owns first-party export of canonical Cachelet telemetry records.
+## Source Of Truth
 
-## Public Publishing Model
+Make source changes in this repository. Split repositories are release mirrors and should not be edited directly during normal development.
 
-- `oxhq/cachelet` is published from the root of this repository.
-- `oxhq/cachelet-core`, `oxhq/cachelet-model`, `oxhq/cachelet-query`, `oxhq/cachelet-request`, and `oxhq/cachelet-exporter` are published from split repositories generated from `packages/*`.
-- All packages are versioned together.
+## Local Workflow
+
+Useful commands:
+
+```bash
+composer validate --strict
+composer validate-packages
+composer format -- --test
+composer analyse
+composer test
+composer test:exporter
+composer benchmark
+```
+
+`composer benchmark` writes ignored local output under `artifacts/benchmarks/`.
+
+## Release Workflow
+
+Release gates and publishing steps are documented in [`releases.md`](releases.md) and [`publishing.md`](publishing.md).

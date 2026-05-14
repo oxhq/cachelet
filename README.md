@@ -1,41 +1,16 @@
 # Cachelet
 
-Cache orchestration for Laravel.
+[![Tests](https://github.com/oxhq/cachelet/actions/workflows/tests.yml/badge.svg)](https://github.com/oxhq/cachelet/actions/workflows/tests.yml)
+[![Latest Version](https://img.shields.io/packagist/v/oxhq/cachelet.svg)](https://packagist.org/packages/oxhq/cachelet)
+[![License](https://img.shields.io/packagist/l/oxhq/cachelet.svg)](LICENSE)
 
-Cachelet gives Laravel teams one consistent way to define cache keys, apply TTL and stale-while-revalidate behavior, inspect what is stored, and invalidate cached data across generic, model, query, and request-level use cases.
+**The cache operations layer for Laravel.**
 
-## Packages
+Stop flushing blind.
 
-| Package | Use it for |
-| --- | --- |
-| `oxhq/cachelet` | Full suite: core + model + query + request + exporter integrations |
-| `oxhq/cachelet-core` | Generic cache builders, TTL/SWR, invalidation, inspection, events, locks |
-| `oxhq/cachelet-model` | Eloquent model builders, payload shaping, observer invalidation |
-| `oxhq/cachelet-query` | Query builder and Eloquent result caching |
-| `oxhq/cachelet-request` | Request and response caching middleware and route integration |
-| `oxhq/cachelet-exporter` | First-party exporter for canonical Cachelet telemetry |
+Cachelet gives every important cache entry a stable coordinate: what it belongs to, where it lives, how it was keyed, how long it should live, and how it can be invalidated without reaching for a whole-store flush.
 
-## Install
-
-Full suite:
-
-```bash
-composer require oxhq/cachelet
-```
-
-Focused installs:
-
-```bash
-composer require oxhq/cachelet-core
-composer require oxhq/cachelet-model
-composer require oxhq/cachelet-query
-composer require oxhq/cachelet-request
-composer require oxhq/cachelet-exporter
-```
-
-## Quick Start
-
-Generic cache builder:
+Laravel already gives you excellent cache primitives. Cachelet turns those primitives into an inspectable operating model across app-level values, Eloquent models, query results, route responses, and optional telemetry exports.
 
 ```php
 use Oxhq\Cachelet\Facades\Cachelet;
@@ -47,10 +22,65 @@ $users = Cachelet::for('users.index')
     ->remember(fn () => User::query()->where('role', 'admin')->paginate());
 ```
 
-Model cache builder:
+## Why Cachelet
+
+Production cache bugs are rarely about calling `remember()` wrong. They are about invisible state:
+
+- Which cache family owns this key?
+- Which store was used?
+- Which request, model, query, or service produced it?
+- What is safe to invalidate?
+- Did the fresh path recover after the intervention?
+
+Cachelet makes those answers first-class.
+
+## What You Get
+
+- **Deterministic coordinates** for core, model, query, and request caches.
+- **Stable key generation** from normalized payloads.
+- **TTL and stale-while-revalidate** with lock-aware refresh behavior.
+- **Scoped invalidation** by key, prefix, tag, or explicit scope.
+- **Local inspection commands** for listing, inspecting, flushing, and pruning cache families.
+- **Canonical telemetry** through `cachelet.telemetry.v1`.
+- **Optional exporter support** when cache visibility needs to feed dashboards, audit trails, or developer tooling.
+
+Cachelet is useful without an external service. The exporter is a tooling bridge for teams that want canonical cache evidence outside the Laravel process.
+
+## Install
+
+Most teams should start with the full suite:
+
+```bash
+composer require oxhq/cachelet
+```
+
+Use focused packages when a project only needs one layer:
+
+| Package | Use it for |
+| --- | --- |
+| `oxhq/cachelet` | Full suite: core + model + query + request + exporter |
+| `oxhq/cachelet-core` | Generic builders, keys, TTL/SWR, invalidation, inspection, telemetry |
+| `oxhq/cachelet-model` | Eloquent model caching, payload shaping, observer invalidation |
+| `oxhq/cachelet-query` | Query builder and Eloquent result caching |
+| `oxhq/cachelet-request` | Request/response caching middleware and route integration |
+| `oxhq/cachelet-exporter` | Optional telemetry export for external tooling |
+
+See the full install guide: [`docs/install-matrix.md`](docs/install-matrix.md).
+
+## Quick Tour
+
+### Core Values
 
 ```php
-use App\Models\User;
+$report = Cachelet::for('reports.sales')
+    ->from(['from' => '2026-01-01', 'to' => '2026-01-31'])
+    ->ttl(1800)
+    ->remember(fn () => $service->salesReport());
+```
+
+### Eloquent Models
+
+```php
 use Oxhq\Cachelet\Traits\UsesCachelet;
 
 class User extends Model
@@ -60,10 +90,11 @@ class User extends Model
 
 $profile = $user->cachelet()
     ->exclude(['updated_at'])
+    ->ttl(300)
     ->remember(fn () => $user->fresh());
 ```
 
-Query cache builder:
+### Queries
 
 ```php
 $admins = User::query()
@@ -73,7 +104,7 @@ $admins = User::query()
     ->rememberQuery();
 ```
 
-Request cache middleware:
+### Route Responses
 
 ```php
 Route::get('/users', UserIndexController::class)
@@ -88,39 +119,58 @@ Route::get('/users', UserIndexController::class)
     ]);
 ```
 
-## What Cachelet Ships
+More examples live in [`examples/`](examples).
 
-- Deterministic cache keys built from normalized payloads
-- Exact-key invalidation and store-agnostic prefix invalidation
-- Stale-while-revalidate with locking and null-safe cache envelopes
-- Explicit `onStore(...)` selection for cache values when sidecars or defaults live elsewhere
-- Typed cache lifecycle events and coordinate inspection commands
-- Sidecar maintenance via `cachelet:prune` for registry and telemetry cleanup
-- Focused Laravel integrations for models, queries, and requests
-- A first-party Cloud exporter for the canonical telemetry stream
+## Operator Commands
 
-## Operator Contract
+Cachelet keeps enough sidecar state to make cache families visible from the CLI:
 
-Cachelet now exposes one canonical coordinate shape across the family. Every coordinate and telemetry record carries:
+```bash
+php artisan cachelet:list users.index
+php artisan cachelet:inspect users.index
+php artisan cachelet:flush users.index
+php artisan cachelet:prune
+```
 
-- `module`: one of `core`, `model`, `query`, or `request`
-- `prefix`, `key`, `ttl`, `version`, `store`, `tags`
-- `swr`: refresh mode and lock/grace settings
-- `metadata`: module-specific fields such as `model_class`, `table`, `route`, or `method`
+The operator guide explains what each answer means: [`docs/operator-questions.md`](docs/operator-questions.md).
 
-When `cachelet.observability.events.enabled` is on, Cachelet emits:
+## The Contract
 
-- legacy lifecycle events such as `CacheletHit` and `CacheletInvalidated`
-- `CacheletTelemetryRecorded` as the canonical operational event for external consumers
+Every coordinate resolves to `cachelet.coordinate.v1` with:
 
-That event wraps a `cachelet.telemetry.v1` projection with the event name, timestamp, coordinate projection, and operation context.
+- `module`: `core`, `model`, `query`, or `request`
+- `prefix`
+- `key`
+- `ttl`
+- `version`
+- `store`
+- `tags`
+- `swr`
+- `metadata`
 
-`oxhq/cachelet-exporter` listens to that telemetry stream and exports `cachelet.cloud.export.v1` payloads through `http`, `log`, `null`, or custom transports.
+When observability events are enabled, Cachelet emits `CacheletTelemetryRecorded` records using `cachelet.telemetry.v1`.
 
-See:
+See [`docs/operations.md`](docs/operations.md) for the full runtime contract.
 
-- [`docs/operations.md`](docs/operations.md)
-- [`docs/benchmarks.md`](docs/benchmarks.md)
+## When To Use Cachelet
+
+Use raw Laravel cache calls when the cache is simple, local, and obvious.
+
+Use a narrow point solution when the app only needs one specialized job, such as response caching.
+
+Use Cachelet when a Laravel app has more than one cache surface and the team needs one vocabulary for keys, scopes, stores, invalidation, inspection, and telemetry.
+
+Comparison guide: [`docs/comparison.md`](docs/comparison.md).
+
+## Docs
+
+- Start here: [`docs/README.md`](docs/README.md)
+- Install matrix: [`docs/install-matrix.md`](docs/install-matrix.md)
+- Migration guide: [`docs/migration.md`](docs/migration.md)
+- Operations contract: [`docs/operations.md`](docs/operations.md)
+- Operator questions: [`docs/operator-questions.md`](docs/operator-questions.md)
+- Benchmarks: [`docs/benchmarks.md`](docs/benchmarks.md)
+- Releases and publishing: [`docs/releases.md`](docs/releases.md)
 
 ## Support Matrix
 
@@ -130,10 +180,17 @@ See:
 
 ## Stability
 
-`0.2.x` is intended to be production-usable. The package family is still early, so focused API tightening may happen before `1.0` if real-world usage exposes a better contract.
+`0.2.x` is intended to be production-usable. The package family is still early, so focused API tightening may happen before `1.0` if real usage proves a better contract.
 
-## Development
+Cachelet does not claim automatic relational invalidation for arbitrary query graphs, CDN orchestration, Blade fragment caching, or perfect zero-config inference for every cache use case.
 
-This repository is both the public source of truth and the install target for `oxhq/cachelet`.
-Maintainer and repository workflow documentation lives in `CONTRIBUTING.md` and `docs/monorepo.md`.
+## Community
 
+- Contributing: [`CONTRIBUTING.md`](CONTRIBUTING.md)
+- Security reports: [`SECURITY.md`](SECURITY.md)
+- Support policy: [`SUPPORT.md`](SUPPORT.md)
+- Code of conduct: [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md)
+
+## Repository
+
+This monorepo is the public source of truth for `oxhq/cachelet` and the focused split packages. Maintainer workflow details live in [`CONTRIBUTING.md`](CONTRIBUTING.md), [`docs/monorepo.md`](docs/monorepo.md), and [`docs/releases.md`](docs/releases.md).

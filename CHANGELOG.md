@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.3.0] - 2026-05-14
+
+Public surface and adoption release for the Cachelet family.
+
+### Added
+
+- reproducible benchmark harness output for the local release gate
+- open-source project templates for issues, pull requests, security reporting, support, and community conduct
+- professional documentation structure with a docs index, release process, clearer package READMEs, and wedge-first README positioning
+- install matrix, migration, comparison, operator questions, and example snippets for the full package family
+- neutral `cachelet.export.v1` exporter envelope for non-Cloud telemetry tooling
+
+### Fixed
+
+- benchmark harness model import and noisy request benchmark output
+- operator docs command example for `cachelet:list`
+
+### Changed
+
+- exporter docs and test expectations now describe Cachelet telemetry as useful for Cloud, logs, dashboards, audit trails, and custom tooling instead of Cloud-only ingestion
+
 ## [0.2.2] - 2026-04-25
 
 Runtime hardening release for the Cachelet family.
@@ -39,17 +60,17 @@ Scoped intervention hardening release for the Cachelet family.
 
 ## [0.2.0] - 2026-04-20
 
-Cloud-readiness release for the Cachelet family.
+Telemetry-readiness release for the Cachelet family.
 
 ### Added
 
 - canonical coordinate and telemetry contracts across `core`, `model`, `query`, and `request`
-- first-party Cloud exporter package with `null`, `log`, `http`, and custom transport support
+- first-party telemetry exporter package with `null`, `log`, `http`, and custom transport support
 - operator and benchmark documentation for the family contract
 
 ### Renamed
 
-- public package name `oxhq/cachelet-cloud` to `oxhq/cachelet-exporter` to avoid collision with the hosted Cachelet Cloud app naming
+- public exporter package name to `oxhq/cachelet-exporter` to keep the package purpose explicit
 
 ### Changed
 

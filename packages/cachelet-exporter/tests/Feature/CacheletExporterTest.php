@@ -38,7 +38,7 @@ final class CacheletExporterTest extends TestCase
         $payloads = InMemoryExporterTransport::$payloads;
 
         $this->assertCount(3, $payloads);
-        $this->assertSame('cachelet.cloud.export.v1', $payloads[0]['contract']);
+        $this->assertSame('cachelet.export.v1', $payloads[0]['contract']);
         $this->assertSame('miss', $payloads[0]['record']['event']);
         $this->assertSame('stored', $payloads[1]['record']['event']);
         $this->assertSame('core', $payloads[1]['record']['module']);
@@ -65,7 +65,7 @@ final class CacheletExporterTest extends TestCase
         config([
             'cachelet-exporter.enabled' => true,
             'cachelet-exporter.transport' => 'http',
-            'cachelet-exporter.client.endpoint' => 'https://cloud.example.test/ingest',
+            'cachelet-exporter.client.endpoint' => 'https://telemetry.example.test/ingest',
             'cachelet-exporter.client.token' => 'secret-token',
             'cachelet-exporter.source.instance' => 'worker-1',
         ]);
@@ -85,9 +85,9 @@ final class CacheletExporterTest extends TestCase
         $this->app->make(ExporterClient::class)->export($record);
 
         Http::assertSent(function ($request): bool {
-            return $request->url() === 'https://cloud.example.test/ingest'
+            return $request->url() === 'https://telemetry.example.test/ingest'
                 && $request->hasHeader('Authorization', 'Bearer secret-token')
-                && $request['contract'] === 'cachelet.cloud.export.v1'
+                && $request['contract'] === 'cachelet.export.v1'
                 && $request['record']['contract'] === 'cachelet.telemetry.v1'
                 && $request['record']['module'] === 'core'
                 && $request['source']['instance'] === 'worker-1';

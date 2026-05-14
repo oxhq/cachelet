@@ -1,0 +1,56 @@
+name: Bug report
+description: Report reproducible Cachelet behavior that looks incorrect.
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Please keep the report reproducible and avoid sharing secrets or private data.
+  - type: input
+    id: package
+    attributes:
+      label: Package
+      description: Which Cachelet package is affected?
+      placeholder: oxhq/cachelet-core
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: Cachelet, Laravel, PHP, and cache store versions.
+      placeholder: Cachelet 0.2.2, Laravel 12.x, PHP 8.4, Redis
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should happen?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction steps
+      description: Include the smallest code sample, command, or test case that reproduces the issue.
+      placeholder: |
+        1. Install ...
+        2. Configure ...
+        3. Run ...
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Logs, stack traces, or links. Do not paste secrets.

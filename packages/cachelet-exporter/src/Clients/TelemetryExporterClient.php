@@ -17,7 +17,7 @@ class TelemetryExporterClient implements ExporterClient
     public function export(CacheTelemetryRecord $record): void
     {
         $this->transport->send([
-            'contract' => 'cachelet.cloud.export.v1',
+            'contract' => 'cachelet.export.v1',
             'sent_at' => CarbonImmutable::now()->toIso8601String(),
             'source' => array_filter([
                 'app' => $this->source['app'] ?? null,

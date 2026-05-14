@@ -49,7 +49,7 @@
     "cache",
     "telemetry",
     "observability",
-    "cloud"
+    "export"
   ],
   "support": {
     "issues": "https://github.com/oxhq/cachelet/issues",

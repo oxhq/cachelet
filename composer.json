@@ -90,6 +90,7 @@
     "test:request": "@php vendor/bin/pest tests/Feature/Request",
     "test:exporter": "@php vendor/bin/phpunit -c packages/cachelet-exporter/phpunit.xml.dist",
     "test:integration": "@php vendor/bin/pest tests/Feature/Integration",
+    "benchmark": "@php tools/benchmark-cachelet.php",
     "format": "@php vendor/bin/pint",
     "analyse": "@php vendor/phpstan/phpstan/phpstan analyse --memory-limit=1G",
     "validate-packages": "@php tools/validate-packages.php"

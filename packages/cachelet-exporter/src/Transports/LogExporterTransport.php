@@ -18,7 +18,7 @@ class LogExporterTransport implements ExporterTransport
             ? $this->logs->channel($this->channel)
             : $this->logs;
 
-        $logger->info('cachelet cloud telemetry exported', [
+        $logger->info('cachelet telemetry exported', [
             'payload' => $payload,
         ]);
     }

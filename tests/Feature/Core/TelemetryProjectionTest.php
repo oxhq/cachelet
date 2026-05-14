@@ -19,7 +19,7 @@ beforeEach(function () {
     Event::fake([CacheletTelemetryRecorded::class]);
 });
 
-it('projects a canonical coordinate shape for cloud consumers', function () {
+it('projects a canonical coordinate shape for telemetry consumers', function () {
     $builder = Cachelet::for('users.index')
         ->scope(CacheScope::named('agency.users'))
         ->from(['page' => 1])
@@ -158,7 +158,7 @@ it('propagates scope through exporter payloads', function () {
     config([
         'cachelet-exporter.enabled' => true,
         'cachelet-exporter.transport' => 'http',
-        'cachelet-exporter.client.endpoint' => 'https://cloud.example.test/ingest',
+        'cachelet-exporter.client.endpoint' => 'https://telemetry.example.test/ingest',
         'cachelet-exporter.client.token' => 'secret-token',
         'cachelet-exporter.source.instance' => 'worker-1',
     ]);
@@ -183,8 +183,9 @@ it('propagates scope through exporter payloads', function () {
     app(ExporterClient::class)->export($record);
 
     Http::assertSent(function ($request): bool {
-        return $request->url() === 'https://cloud.example.test/ingest'
+        return $request->url() === 'https://telemetry.example.test/ingest'
             && $request->hasHeader('Authorization', 'Bearer secret-token')
+            && $request['contract'] === 'cachelet.export.v1'
             && $request['record']['coordinate']['scope']['identifier'] === 'agency.users'
             && $request['record']['coordinate']['scope']['source'] === 'explicit';
     });

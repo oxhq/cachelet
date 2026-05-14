@@ -1,8 +1,8 @@
 # cachelet-exporter
 
-Read-only split of the Cachelet monorepo package at `packages/cachelet-exporter`.
+Optional telemetry export for Cachelet records.
 
-First-party Cloud exporter for Cachelet's canonical telemetry stream.
+`cachelet-exporter` listens for canonical Cachelet telemetry and sends it to a configured transport. Use it to feed logs, dashboards, audit trails, or custom developer tools. It is not required for local cache correctness.
 
 ## Install
 
@@ -10,13 +10,17 @@ First-party Cloud exporter for Cachelet's canonical telemetry stream.
 composer require oxhq/cachelet-exporter
 ```
 
-## Features
+## Best Fit
 
-- listens for `CacheletTelemetryRecorded`
-- exports canonical `cachelet.telemetry.v1` records
-- ships configurable `http`, `log`, and `null` transports
-- allows custom transport classes through the container
-- publishes `cachelet-exporter.php` for endpoint and source metadata
+Add this package when Cachelet is already useful inside the app and the team now wants the same cache evidence outside the Laravel process.
+
+It provides:
+
+- `CacheletTelemetryRecorded` listener wiring
+- `cachelet.telemetry.v1` export records
+- `cachelet.export.v1` envelopes
+- `http`, `log`, and `null` transports
+- custom transport classes through the container
 
 ## Example
 
@@ -31,13 +35,12 @@ return [
 ];
 ```
 
-When Cachelet emits `CacheletTelemetryRecorded`, `cachelet-exporter` wraps the
-canonical record in `cachelet.cloud.export.v1` and forwards it through the
-configured transport.
+## Boundary
 
-## Custom transports
+The exporter is optional. Cachelet's runtime key generation, invalidation, inspection, and telemetry contracts work locally without an external service.
 
-Set `cachelet-exporter.transport` to a class name that implements
-`Oxhq\\Cachelet\\Exporter\\Contracts\\ExporterTransport`. The service provider
-resolves that class through Laravel's container, so test doubles and custom
-adapters can be injected without patching core Cachelet code.
+## Docs
+
+- [`../../docs/operations.md`](../../docs/operations.md)
+- [`../../docs/install-matrix.md`](../../docs/install-matrix.md)
+- [`../../docs/comparison.md`](../../docs/comparison.md)

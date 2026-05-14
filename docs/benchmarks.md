@@ -2,22 +2,55 @@
 
 Cachelet is meant to add explicit cache coordination without hiding operational cost.
 
-## What To Measure
+## Reproducible Harness
 
-Measure the paths that matter to your application and compare:
+Run the built-in benchmark harness:
+
+```bash
+composer benchmark
+```
+
+Optional environment variables:
+
+```bash
+CACHELET_BENCH_STORE=array
+CACHELET_BENCH_ITERATIONS=25
+CACHELET_BENCH_OUTPUT=artifacts/benchmarks/cachelet-benchmark.json
+composer benchmark
+```
+
+The harness boots a package Testbench app and writes a local JSON report with:
+
+- store
+- PHP version
+- Laravel version
+- iteration count
+- core miss/hit timings
+- query miss/hit timings
+- request miss/hit timings
+- prefix invalidation timing
+
+Benchmark reports are local output and are ignored by git. Treat them as reproducibility evidence for the environment where they were generated, not as a universal performance claim.
+
+## What To Measure In Your App
+
+Measure the paths that matter to your application:
 
 - raw Laravel cache calls
 - Cachelet core builders
 - Cachelet query builders
 - Cachelet request middleware
-
-For each path, capture:
-
-- cache miss latency
-- cache hit latency
-- stale hit latency
-- invalidation latency by exact key and by prefix
+- invalidation by exact key, prefix, tag, and scope
 - metadata inspection latency
+
+Record:
+
+- driver/store (`array`, `file`, `redis`, database-backed cache)
+- payload size
+- result count
+- tag support
+- whether SWR refresh was synchronous or deferred
+- whether a sidecar store differs from the value store
 
 ## Recommended Scenarios
 
@@ -29,7 +62,7 @@ For each path, capture:
 
 ### Query
 
-- identical SQL/bindings hit path
+- identical SQL and bindings hit path
 - different bindings miss path
 - table-prefix invalidation
 
@@ -39,22 +72,13 @@ For each path, capture:
 - different vary inputs miss path
 - namespace invalidation
 
-## What To Record
+## Why Telemetry Matters
 
-- driver/store (`array`, `file`, `redis`, database-backed cache)
-- payload size
-- result count
-- whether tags are supported on the store
-- whether SWR refresh was synchronous or deferred
-
-## Why The Telemetry Contract Matters
-
-`CacheletTelemetryRecorded` and `cachelet.coordinate.v1` let you attribute benchmark results by:
+Timing numbers alone are not enough. `CacheletTelemetryRecorded` and `cachelet.coordinate.v1` let external tooling aggregate benchmark and runtime evidence by:
 
 - module
 - store
 - prefix
+- scope
 - SWR strategy
 - entry state
-
-That means the benchmark story is not just timing numbers. It is a stable projection that external tooling can aggregate without module-specific adapters.
