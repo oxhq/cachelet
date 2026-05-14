@@ -61,11 +61,11 @@
   ],
   "require": {
     "php": "^8.2",
-    "oxhq/cachelet-core": "^0.2",
-    "oxhq/cachelet-model": "^0.2",
-    "oxhq/cachelet-query": "^0.2",
-    "oxhq/cachelet-request": "^0.2",
-    "oxhq/cachelet-exporter": "^0.2"
+    "oxhq/cachelet-core": "^0.3",
+    "oxhq/cachelet-model": "^0.3",
+    "oxhq/cachelet-query": "^0.3",
+    "oxhq/cachelet-request": "^0.3",
+    "oxhq/cachelet-exporter": "^0.3"
   },
   "require-dev": {
     "larastan/larastan": "^3.9",
@@ -105,7 +105,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-main": "0.2.x-dev"
+      "dev-main": "0.3.x-dev"
     }
   }
 }

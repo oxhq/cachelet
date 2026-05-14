@@ -15,7 +15,7 @@
     "illuminate/http": "^12.0|^13.0",
     "illuminate/log": "^12.0|^13.0",
     "illuminate/support": "^12.0|^13.0",
-    "oxhq/cachelet-core": "^0.2"
+    "oxhq/cachelet-core": "^0.3"
   },
   "require-dev": {
     "orchestra/testbench": "^10.0|^11.0",
@@ -33,7 +33,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-main": "0.2.x-dev"
+      "dev-main": "0.3.x-dev"
     },
     "laravel": {
       "providers": [
