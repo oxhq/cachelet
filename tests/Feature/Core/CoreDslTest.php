@@ -29,6 +29,12 @@ it('parses integer, string, and datetime ttls', function () {
         ->and(Cachelet::for('dt')->from('x')->ttl($datetime)->duration())->toBe(300);
 });
 
+it('rounds fractional datetime ttls up to whole seconds', function () {
+    $datetime = Carbon::now()->addSeconds(59)->addMilliseconds(250);
+
+    expect(Cachelet::for('fractional-dt')->from('x')->ttl($datetime)->duration())->toBe(60);
+});
+
 it('stores and fetches cached values', function () {
     $builder = Cachelet::for('remember')->from(['id' => 10])->ttl(60);
 

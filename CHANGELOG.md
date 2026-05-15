@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1] - 2026-05-14
+
+Patch release for PHP 8.5 runtime polish.
+
+### Fixed
+
+- rounded fractional datetime TTLs and stale-window TTLs before passing them to cache stores, removing PHP 8.5 float-to-int deprecation noise
+
 ## [0.3.0] - 2026-05-14
 
 Public surface and adoption release for the Cachelet family.
